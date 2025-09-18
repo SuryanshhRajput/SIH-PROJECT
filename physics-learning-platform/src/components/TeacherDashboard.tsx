@@ -1,0 +1,158 @@
+import React from "react";
+import { User, Trophy, Award, BookOpen, CheckCircle } from "lucide-react";
+import { User as UserType, Assignment } from "../types";
+
+interface TeacherDashboardProps {
+  currentUser: UserType;
+  users: UserType[];
+  assignments: Assignment[];
+  setCurrentPage: (page: string) => void;
+}
+
+const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users, assignments, setCurrentPage }) => {
+  const students = (users || []).filter((u) => u.userType === "student");
+  const totalStudents = students.length;
+
+  const avgProgress =
+    students.length > 0
+      ? Math.round(
+          students.reduce(
+            (sum, s) => sum + (s.progress?.completedLessons || 0),
+            0
+          ) / students.length
+        )
+      : 0;
+
+  const avgScore =
+    students.length > 0
+      ? Math.round(
+          students.reduce(
+            (sum, s) => sum + (s.progress?.totalScore || 0),
+            0
+          ) / students.length
+        )
+      : 0;
+
+  return (
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          Teacher Dashboard
+        </h2>
+        <p className="text-gray-600">
+          Welcome back, {currentUser?.profile?.name || currentUser.username}!
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl">
+          <User className="w-8 h-8 mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Total Students</h3>
+          <p className="text-2xl font-bold">{totalStudents}</p>
+        </div>
+
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
+          <Trophy className="w-8 h-8 mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Avg Progress</h3>
+          <p className="text-2xl font-bold">{avgProgress}/5</p>
+          <p className="text-sm opacity-90">Lessons</p>
+        </div>
+
+        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl">
+          <Award className="w-8 h-8 mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Avg Score</h3>
+          <p className="text-2xl font-bold">{avgScore}%</p>
+        </div>
+
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl">
+          <BookOpen className="w-8 h-8 mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Assignments</h3>
+          <p className="text-2xl font-bold">{assignments.length}</p>
+          <p className="text-sm opacity-90">Active</p>
+        </div>
+      </div>
+
+      {/* Activity + Quick Actions */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Recent Activity */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-xl font-semibold mb-4">Recent Student Activity</h3>
+          <div className="space-y-4">
+            {students.slice(0, 5).map((student) => (
+              <div
+                key={student.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{student.profile?.name || student.username}</p>
+                    <p className="text-sm text-gray-600">
+                      {student.progress?.completedLessons || 0} lessons
+                      completed
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className={`px-2 py-1 rounded text-xs ${
+                    (student.progress?.totalScore || 0) >= 80
+                      ? "bg-green-100 text-green-700"
+                      : (student.progress?.totalScore || 0) >= 60
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {student.progress?.totalScore || 0}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={() => setCurrentPage("create-quiz")}
+              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+            >
+              <CheckCircle className="w-8 h-8 text-blue-600 mb-2" />
+              <span className="font-medium text-center">Create Quiz</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentPage("assignments")}
+              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+            >
+              <BookOpen className="w-8 h-8 text-green-600 mb-2" />
+              <span className="font-medium text-center">Assignments</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentPage("attendance")}
+              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+            >
+              <User className="w-8 h-8 text-purple-600 mb-2" />
+              <span className="font-medium text-center">Attendance</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentPage("students")}
+              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+            >
+              <Trophy className="w-8 h-8 text-orange-600 mb-2" />
+              <span className="font-medium text-center">View Students</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TeacherDashboard;
