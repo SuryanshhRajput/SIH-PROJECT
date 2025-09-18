@@ -18,7 +18,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
           <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
             <Target className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white drop-shadow-lg">Physics Motion Lab</h1>
+          <h1 className="text-2xl font-bold text-white drop-shadow-lg">Vidya Verse</h1>
           <span className="text-sm bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full border border-white/30">
             {currentUser?.userType === "teacher" ? "👨‍🏫 Teacher" : "🎓 Student"}
           </span>

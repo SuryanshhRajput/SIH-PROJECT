@@ -55,7 +55,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
             },
           ]);
           setCurrentPage("dashboard");
-          alert("Account created successfully! Welcome to Physics Motion Lab!");
+          alert("Account created successfully! Welcome to Vidya Verse!");
         } else {
           const user = users.find(
             (u) => u.username === loginData.username.trim() && u.password === loginData.password
@@ -162,8 +162,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
             <Target className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Physics Motion Lab</h1>
-          <p className="text-white/80 text-lg">Learn physics through interactive animations</p>
+          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Vidya Verse</h1>
+          <p className="text-white/80 text-lg">Learn anything through interactive animations</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
