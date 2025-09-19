@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "./firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc,  } from "firebase/firestore";
+import { doc, collection, getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { User, Notification, Assignment, Quiz, AttendanceRecord, AnimationState, PhysicsQuestion, QuizAnswers, StudyNote } from "./types";
 
@@ -24,6 +24,8 @@ import AssignmentsPage from "./components/AssignmentsPage";
 import AttendancePage from "./components/AttendancePage";
 import StudentsPage from "./components/StudentsPage";
 import { getDoc } from "firebase/firestore";
+import AIChat from "./components/AIChat";
+import AIChatPage from "./components/AIChatPage";
 
 const PhysicsLearningPlatform = () => {
   // Global State
@@ -96,6 +98,14 @@ const PhysicsLearningPlatform = () => {
             userDoc.data().userType === "teacher" ? "teacher-dashboard" : "dashboard"
           );
         }
+        // load users list
+        const usersSnap = await getDocs(collection(db, "users"));
+        const allUsers: User[] = usersSnap.docs.map((d) => d.data() as User);
+        setUsers(allUsers);
+        // load attendance
+        const attendanceSnap = await getDocs(collection(db, "attendance"));
+        const allAttendance: AttendanceRecord[] = attendanceSnap.docs.map((d) => d.data() as AttendanceRecord);
+        setAttendance(allAttendance);
       } else {
         setCurrentUser(null);
         setCurrentPage("login");
@@ -162,6 +172,9 @@ const PhysicsLearningPlatform = () => {
               addNotification={addNotification}
             />
           )}
+          {currentPage === "ai" && (
+            <AIChatPage />
+          )}
           {currentPage === "notes" && (
             <NotesPage studyNotes={studyNotes} addNotification={addNotification} />
           )}
@@ -172,6 +185,7 @@ const PhysicsLearningPlatform = () => {
               users={users}
               setUsers={setUsers}
               addNotification={addNotification}
+              attendance={attendance}
             />
           )}
           {currentPage === "notifications" && (
@@ -235,6 +249,7 @@ const PhysicsLearningPlatform = () => {
               users={users}
               setUsers={setUsers}
               addNotification={addNotification}
+              attendance={attendance}
             />
           )}
           {currentPage === "notifications" && (
@@ -245,6 +260,7 @@ const PhysicsLearningPlatform = () => {
           )}
         </>
       )}
+      <AIChat />
     </div>
   );
 };

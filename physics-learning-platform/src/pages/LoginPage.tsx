@@ -36,7 +36,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
 
     try {
       if (!loginData.email.trim() || !loginData.password.trim()) {
-        alert("Please enter both email and password");
+        setNotifications([{ id: Date.now(), message: "Please enter both email and password", timestamp: new Date() }]);
         setLoading(false);
         return;
       }
@@ -44,7 +44,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
       if (isSignup) {
         // Validate signup fields
         if (!fullName.trim() || !rollNumber.trim() || !grade.trim()) {
-          alert("Please fill Full Name, Roll Number and Grade");
+          setNotifications([{ id: Date.now(), message: "Please fill Full Name, Roll Number and Grade", timestamp: new Date() }]);
           setLoading(false);
           return;
         }
@@ -52,7 +52,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         const q = query(collection(db, "users"), where("rollNumber", "==", rollNumber.trim()));
         const existing = await getDocs(q);
         if (!existing.empty) {
-          alert("This roll number is already registered.");
+          setNotifications([{ id: Date.now(), message: "This roll number is already registered.", timestamp: new Date() }]);
           setLoading(false);
           return;
         }
@@ -83,14 +83,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
 
         setCurrentUser(newUser);
         setCurrentPage("dashboard");
-        setNotifications([
-          {
-            id: Date.now(),
-            message: "Welcome! Account created successfully.",
-            timestamp: new Date(),
-          },
-        ]);
-        alert("Account created successfully! Welcome to Vidya Verse!");
+        setNotifications([{ id: Date.now(), message: "Welcome! Account created successfully.", timestamp: new Date() }]);
       } else {
         // Login → Firebase auth + fetch profile
         const userCred = await signInWithEmailAndPassword(
@@ -106,15 +99,12 @@ const LoginPage: React.FC<LoginPageProps> = ({
           setCurrentPage(
             userData.userType === "teacher" ? "teacher-dashboard" : "dashboard"
           );
-          setNotifications([
-            { id: Date.now(), message: "Welcome back!", timestamp: new Date() },
-          ]);
-          alert("Login successful!");
+          setNotifications([{ id: Date.now(), message: "Welcome back!", timestamp: new Date() }]);
         }
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      alert(error.message || "An error occurred. Please try again.");
+      setNotifications([{ id: Date.now(), message: error.message || "An error occurred. Please try again.", timestamp: new Date() }]);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { User, Settings } from "lucide-react";
-import { User as UserType } from "../types";
+import { User as UserType, AttendanceRecord } from "../types";
+import { useMemo } from "react";
 
 interface ProfilePageProps {
   currentUser: UserType;
@@ -8,15 +9,23 @@ interface ProfilePageProps {
   users: UserType[];
   setUsers: (users: UserType[]) => void;
   addNotification: (message: string) => void;
+  attendance?: AttendanceRecord[];
 }
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, setCurrentUser, users, setUsers, addNotification }) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, setCurrentUser, users, setUsers, addNotification, attendance = [] }) => {
   const [profileData, setProfileData] = useState({
     name: currentUser?.profile?.name || "",
     email: currentUser?.profile?.email || "",
     grade: currentUser?.profile?.grade || "10th",
   });
   const [isEditing, setIsEditing] = useState(false);
+
+  const attendanceStats = useMemo(() => {
+    const records = attendance.filter(a => a.studentId === currentUser.id);
+    const total = records.length;
+    const present = records.filter(r => r.status === 'present').length;
+    return { total, present, percent: total ? Math.round((present / total) * 100) : 0 };
+  }, [attendance, currentUser.id]);
 
   const handleSave = () => {
     const updatedUser = {
@@ -148,6 +157,20 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, setCurrentUser, 
               {currentUser?.progress?.quizScores?.length || 0}
             </p>
             <p className="text-gray-700">Quizzes Taken</p>
+          </div>
+        </div>
+        <div className="mt-6 grid md:grid-cols-3 gap-6">
+          <div className="text-center p-4 bg-purple-50 rounded-lg">
+            <p className="text-3xl font-bold text-purple-600">{attendanceStats.total}</p>
+            <p className="text-gray-700">Attendance Days</p>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <p className="text-3xl font-bold text-green-600">{attendanceStats.present}</p>
+            <p className="text-gray-700">Present</p>
+          </div>
+          <div className="text-center p-4 bg-yellow-50 rounded-lg">
+            <p className="text-3xl font-bold text-yellow-600">{attendanceStats.percent}%</p>
+            <p className="text-gray-700">Attendance Rate</p>
           </div>
         </div>
       </div>

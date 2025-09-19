@@ -28,7 +28,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
           {currentUser?.userType === "teacher" ? (
             // Teacher Navigation
             <>
-              {["teacher-dashboard", "students", "create-quiz", "assignments", "attendance", "teacher-profile"].map(
+              {["teacher-dashboard", "students", "create-quiz", "assignments", "attendance", "ai", "teacher-profile"].map(
                 (page) => (
                   <button
                     key={page}
@@ -44,6 +44,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
                     {page === "create-quiz" && <CheckCircle className="w-5 h-5" />}
                     {page === "assignments" && <BookOpen className="w-5 h-5" />}
                     {page === "attendance" && <CheckCircle className="w-5 h-5" />}
+                    {page === "ai" && <Play className="w-5 h-5" />}
                     {page === "teacher-profile" && <Settings className="w-5 h-5" />}
                     <span className="capitalize">{page.replace("-", " ")}</span>
                   </button>
@@ -53,7 +54,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
           ) : (
             // Student Navigation
             <>
-              {["dashboard", "lessons", "quiz", "notes", "profile"].map((page) => (
+              {["dashboard", "lessons", "quiz", "ai", "notes", "profile"].map((page) => (
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
@@ -66,6 +67,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
                   {page === "dashboard" && <Trophy className="w-5 h-5" />}
                   {page === "lessons" && <Play className="w-5 h-5" />}
                   {page === "quiz" && <CheckCircle className="w-5 h-5" />}
+                  {page === "ai" && <Play className="w-5 h-5" />}
                   {page === "notes" && <BookOpen className="w-5 h-5" />}
                   {page === "profile" && <User className="w-5 h-5" />}
                   <span className="capitalize">{page}</span>

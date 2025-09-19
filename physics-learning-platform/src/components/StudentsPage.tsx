@@ -19,15 +19,20 @@ const StudentsPage: React.FC<StudentsPageProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("username");
+  const [gradeFilter, setGradeFilter] = useState("");
   const [rollLookup, setRollLookup] = useState("");
   const [loadingLookup, setLoadingLookup] = useState(false);
 
   const students = users.filter(user => user.userType === "student");
   
-  const filteredStudents = students.filter(student =>
-    student.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStudents = students
+    .filter(student =>
+      student.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(student =>
+      gradeFilter ? (student.profile?.grade || "").toLowerCase() === gradeFilter.toLowerCase() : true
+    );
 
   const sortedStudents = [...filteredStudents].sort((a, b) => {
     switch (sortBy) {
@@ -112,6 +117,15 @@ const StudentsPage: React.FC<StudentsPageProps> = ({
               <option value="score">Sort by Score</option>
             </select>
           </div>
+        <div>
+          <input
+            type="text"
+            placeholder="Filter by grade (e.g. 10th)"
+            value={gradeFilter}
+            onChange={(e) => setGradeFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
           <div className="flex gap-2">
             <input
               type="text"
