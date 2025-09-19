@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { auth } from "./firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc,  } from "firebase/firestore";
+import { db } from "./firebaseConfig";
 import { User, Notification, Assignment, Quiz, AttendanceRecord, AnimationState, PhysicsQuestion, QuizAnswers, StudyNote } from "./types";
 
 // Pages
@@ -19,6 +23,7 @@ import CreateQuizPage from "./components/CreateQuizPage";
 import AssignmentsPage from "./components/AssignmentsPage";
 import AttendancePage from "./components/AttendancePage";
 import StudentsPage from "./components/StudentsPage";
+import { getDoc } from "firebase/firestore";
 
 const PhysicsLearningPlatform = () => {
   // Global State
@@ -79,6 +84,26 @@ const PhysicsLearningPlatform = () => {
     };
     setNotifications((prev) => [...prev, newNotification]);
   };
+  
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // fetch Firestore profile
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setCurrentUser(userDoc.data() as User);
+          setCurrentPage(
+            userDoc.data().userType === "teacher" ? "teacher-dashboard" : "dashboard"
+          );
+        }
+      } else {
+        setCurrentUser(null);
+        setCurrentPage("login");
+      }
+    });
+
+    return () => unsub(); // cleanup
+  }, []);
 
   // Show Login if not logged in
   if (!currentUser) {
@@ -167,6 +192,8 @@ const PhysicsLearningPlatform = () => {
               users={users}
               assignments={assignments}
               setCurrentPage={setCurrentPage}
+              setUsers={setUsers}
+              addNotification={addNotification}
             />
           )}
           {currentPage === "create-quiz" && (

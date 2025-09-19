@@ -1,17 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { User, Trophy, Award, BookOpen, CheckCircle } from "lucide-react";
 import { User as UserType, Assignment } from "../types";
+import { db } from "../firebaseConfig";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 interface TeacherDashboardProps {
   currentUser: UserType;
   users: UserType[];
   assignments: Assignment[];
   setCurrentPage: (page: string) => void;
+  setUsers: (users: UserType[]) => void;
+  addNotification?: (message: string) => void;
 }
 
-const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users, assignments, setCurrentPage }) => {
+const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users, assignments, setCurrentPage, setUsers, addNotification }) => {
   const students = (users || []).filter((u) => u.userType === "student");
   const totalStudents = students.length;
+
+  const [rollLookup, setRollLookup] = useState("");
+  const [loadingLookup, setLoadingLookup] = useState(false);
 
   const avgProgress =
     students.length > 0
@@ -32,6 +39,29 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
           ) / students.length
         )
       : 0;
+
+  const fetchStudentByRoll = async () => {
+    if (!rollLookup.trim()) return;
+    try {
+      setLoadingLookup(true);
+      const q = query(collection(db, "users"), where("rollNumber", "==", rollLookup.trim()));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        addNotification?.("No student found with that roll number");
+        return;
+      }
+      const docData = snap.docs[0].data() as UserType;
+      if (!users.find(u => u.id === (docData as any).id)) {
+        setUsers([...users, docData]);
+      }
+      addNotification?.("Student added to your list");
+      setRollLookup("");
+    } catch (e) {
+      addNotification?.("Failed to fetch student by roll number");
+    } finally {
+      setLoadingLookup(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -148,6 +178,27 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
               <Trophy className="w-8 h-8 text-orange-600 mb-2" />
               <span className="font-medium text-center">View Students</span>
             </button>
+          </div>
+
+          {/* Roll number add */}
+          <div className="mt-6 p-4 border border-gray-200 rounded-lg">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Add student by Roll / Enrollment</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={rollLookup}
+                onChange={(e) => setRollLookup(e.target.value)}
+                placeholder="Enter roll number"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={fetchStudentByRoll}
+                disabled={loadingLookup}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {loadingLookup ? "Adding..." : "Add Student"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

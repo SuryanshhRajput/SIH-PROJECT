@@ -17,7 +17,7 @@ const AttendancePage: React.FC<AttendancePageProps> = ({ currentUser, users, att
   );
   const [attendanceRecord, setAttendanceRecord] = useState({});
 
-  const markAttendance = (studentId: number, status: 'present' | 'absent' | 'late') => {
+  const markAttendance = (studentId: string, status: 'present' | 'absent' | 'late') => {
     setAttendanceRecord((prev: any) => ({
       ...prev,
       [`${selectedDate}-${studentId}`]: status,

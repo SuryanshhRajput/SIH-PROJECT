@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Target } from "lucide-react";
 import { User, Notification } from "../types";
+import { auth, db } from "../firebaseConfig";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 
 interface LoginPageProps {
   setCurrentUser: (user: User | null) => void;
@@ -10,83 +13,117 @@ interface LoginPageProps {
   setNotifications: (notifications: Notification[]) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, users, setUsers, setNotifications }) => {
-  const [loginData, setLoginData] = useState({ username: "", password: "" });
+const LoginPage: React.FC<LoginPageProps> = ({
+  setCurrentUser,
+  setCurrentPage,
+  users,
+  setUsers,
+  setNotifications,
+}) => {
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [isSignup, setIsSignup] = useState(false);
   const [loading, setLoading] = useState(false);
+  // signup fields
+  const [fullName, setFullName] = useState("");
+  const [rollNumber, setRollNumber] = useState("");
+  const [classSection, setClassSection] = useState("");
+  const [grade, setGrade] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  // 🔹 Firebase-powered login/signup
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    setTimeout(() => {
-      try {
-        if (!loginData.username.trim() || !loginData.password.trim()) {
-          alert("Please enter both username and password");
+    try {
+      if (!loginData.email.trim() || !loginData.password.trim()) {
+        alert("Please enter both email and password");
+        setLoading(false);
+        return;
+      }
+
+      if (isSignup) {
+        // Validate signup fields
+        if (!fullName.trim() || !rollNumber.trim() || !grade.trim()) {
+          alert("Please fill Full Name, Roll Number and Grade");
           setLoading(false);
           return;
         }
-
-        if (isSignup) {
-          const existingUser = users.find((u) => u.username === loginData.username.trim());
-          if (existingUser) {
-            alert("Username already exists. Please choose a different one.");
-            setLoading(false);
-            return;
-          }
-
-          const newUser: User = {
-            id: Date.now(),
-            username: loginData.username.trim(),
-            email: `${loginData.username.trim()}@example.com`,
-            password: loginData.password,
-            userType: "student",
-            progress: { completedLessons: 0, quizScores: [], totalScore: 0 },
-            profile: { name: loginData.username.trim(), email: `${loginData.username.trim()}@example.com`, grade: "10th" },
-          };
-
-          setUsers([...users, newUser]);
-          setCurrentUser(newUser);
-          setNotifications([
-            {
-              id: Date.now(),
-              message: "Welcome! Your account has been created successfully.",
-              timestamp: new Date(),
-            },
-          ]);
-          setCurrentPage("dashboard");
-          alert("Account created successfully! Welcome to Vidya Verse!");
-        } else {
-          const user = users.find(
-            (u) => u.username === loginData.username.trim() && u.password === loginData.password
-          );
-          if (user) {
-            setCurrentUser(user);
-            setNotifications([
-              {
-                id: Date.now(),
-                message: "Welcome back!",
-                timestamp: new Date(),
-              },
-            ]);
-            setCurrentPage(user.userType === "teacher" ? "teacher-dashboard" : "dashboard");
-            alert("Login successful!");
-          } else {
-            alert("Invalid credentials. Please try again or sign up for a new account.");
-          }
+        // Ensure unique roll number
+        const q = query(collection(db, "users"), where("rollNumber", "==", rollNumber.trim()));
+        const existing = await getDocs(q);
+        if (!existing.empty) {
+          alert("This roll number is already registered.");
+          setLoading(false);
+          return;
         }
-      } catch (error) {
-        console.error("Login error:", error);
-        alert("An error occurred. Please try again.");
+        // Signup → Firebase auth + Firestore profile
+        const userCred = await createUserWithEmailAndPassword(
+          auth,
+          loginData.email.trim(),
+          loginData.password
+        );
+
+        const newUser: User = {
+          id: userCred.user.uid,
+          username: fullName.trim(),
+          email: loginData.email.trim(),
+          password: loginData.password,
+          userType: "student",
+          rollNumber: rollNumber.trim(),
+          classSection: classSection.trim() || undefined,
+          progress: { completedLessons: 0, quizScores: [], totalScore: 0 },
+          profile: {
+            name: fullName.trim(),
+            email: loginData.email.trim(),
+            grade: grade.trim() || "",
+          },
+        };
+
+        await setDoc(doc(db, "users", newUser.id), newUser);
+
+        setCurrentUser(newUser);
+        setCurrentPage("dashboard");
+        setNotifications([
+          {
+            id: Date.now(),
+            message: "Welcome! Account created successfully.",
+            timestamp: new Date(),
+          },
+        ]);
+        alert("Account created successfully! Welcome to Vidya Verse!");
+      } else {
+        // Login → Firebase auth + fetch profile
+        const userCred = await signInWithEmailAndPassword(
+          auth,
+          loginData.email.trim(),
+          loginData.password
+        );
+
+        const userDoc = await getDoc(doc(db, "users", userCred.user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data() as User;
+          setCurrentUser(userData);
+          setCurrentPage(
+            userData.userType === "teacher" ? "teacher-dashboard" : "dashboard"
+          );
+          setNotifications([
+            { id: Date.now(), message: "Welcome back!", timestamp: new Date() },
+          ]);
+          alert("Login successful!");
+        }
       }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      alert(error.message || "An error occurred. Please try again.");
+    } finally {
       setLoading(false);
-    }, 100);
+    }
   };
 
   // Demo login (student)
   const handleDemoLogin = (): void => {
     const demoUser: User = {
-      id: Date.now(),
+      id: String(Date.now()),
       username: "demo",
       email: "demo@example.com",
       password: "demo123",
@@ -104,7 +141,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
   // Demo login (teacher)
   const handleTeacherDemo = (): void => {
     const teacherUser: User = {
-      id: Date.now(),
+      id: String(Date.now()),
       username: "teacher",
       email: "teacher@school.com",
       password: "teacher123",
@@ -114,7 +151,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
 
     const demoStudents: User[] = [
       {
-        id: Date.now() + 1,
+        id: String(Date.now() + 1),
         username: "alice",
         email: "alice@student.com",
         password: "alice123",
@@ -123,7 +160,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
         profile: { name: "Alice Smith", email: "alice@student.com", grade: "10th" },
       },
       {
-        id: Date.now() + 2,
+        id: String(Date.now() + 2),
         username: "bob",
         email: "bob@student.com",
         password: "bob123",
@@ -132,7 +169,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
         profile: { name: "Bob Johnson", email: "bob@student.com", grade: "10th" },
       },
       {
-        id: Date.now() + 3,
+        id: String(Date.now() + 3),
         username: "carol",
         email: "carol@student.com",
         password: "carol123",
@@ -156,7 +193,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
         <div className="absolute top-40 left-1/2 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
       </div>
-      
+
       <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-md border border-white/20 relative z-10">
         <div className="text-center mb-8">
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
@@ -167,14 +204,65 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
+          {isSignup && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-white/90 mb-3">Full Name</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
+                  placeholder="Enter your full name"
+                  disabled={loading}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-3">Roll Number</label>
+                  <input
+                    type="text"
+                    value={rollNumber}
+                    onChange={(e) => setRollNumber(e.target.value)}
+                    className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
+                    placeholder="Unique roll number"
+                    disabled={loading}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-3">Class Section (optional)</label>
+                  <input
+                    type="text"
+                    value={classSection}
+                    onChange={(e) => setClassSection(e.target.value)}
+                    className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
+                    placeholder="e.g. 10-A"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white/90 mb-3">Grade</label>
+                <input
+                  type="text"
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
+                  placeholder="e.g. 10th"
+                  disabled={loading}
+                />
+              </div>
+            </>
+          )}
+
           <div>
-            <label className="block text-sm font-medium text-white/90 mb-3">Username</label>
+            <label className="block text-sm font-medium text-white/90 mb-3">Email</label>
             <input
-              type="text"
-              value={loginData.username}
-              onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+              type="email"
+              value={loginData.email}
+              onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
               className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               required
               disabled={loading}
             />
@@ -196,8 +284,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ setCurrentUser, setCurrentPage, u
           <button
             type="submit"
             className={`w-full py-4 rounded-xl transition-all duration-300 font-semibold text-lg transform hover:scale-105 ${
-              loading 
-                ? "bg-gray-400 cursor-not-allowed" 
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
                 : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-xl"
             } text-white`}
             disabled={loading}

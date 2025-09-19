@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { User, GraduationCap } from "lucide-react";
 import { User as UserType } from "../types";
+import { db } from "../firebaseConfig";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 interface StudentsPageProps {
   currentUser: UserType;
@@ -17,6 +19,8 @@ const StudentsPage: React.FC<StudentsPageProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("username");
+  const [rollLookup, setRollLookup] = useState("");
+  const [loadingLookup, setLoadingLookup] = useState(false);
 
   const students = users.filter(user => user.userType === "student");
   
@@ -38,7 +42,30 @@ const StudentsPage: React.FC<StudentsPageProps> = ({
     }
   });
 
-  const updateStudentProgress = (studentId: number, field: string, value: any) => {
+  const fetchStudentByRoll = async () => {
+    if (!rollLookup.trim()) return;
+    try {
+      setLoadingLookup(true);
+      const q = query(collection(db, "users"), where("rollNumber", "==", rollLookup.trim()));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        addNotification("No student found with that roll number");
+        return;
+      }
+      const docData = snap.docs[0].data() as UserType;
+      // merge into local list if not present
+      if (!users.find(u => u.id === (docData as any).id)) {
+        setUsers([...users, docData]);
+      }
+      addNotification("Student loaded by roll number");
+    } catch (e) {
+      addNotification("Failed to fetch student by roll number");
+    } finally {
+      setLoadingLookup(false);
+    }
+  };
+
+  const updateStudentProgress = (studentId: string, field: string, value: any) => {
     setUsers(users.map(user => 
       user.id === studentId 
         ? {
@@ -84,6 +111,22 @@ const StudentsPage: React.FC<StudentsPageProps> = ({
               <option value="progress">Sort by Progress</option>
               <option value="score">Sort by Score</option>
             </select>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Roll number"
+              value={rollLookup}
+              onChange={(e) => setRollLookup(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={fetchStudentByRoll}
+              disabled={loadingLookup}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {loadingLookup ? "Loading..." : "Find by Roll"}
+            </button>
           </div>
         </div>
       </div>

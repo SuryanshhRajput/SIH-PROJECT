@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { BookOpen, Calendar, Plus, Edit, Trash2 } from "lucide-react";
 import { User, Assignment } from "../types";
+import { storage } from "../firebaseConfig";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 interface AssignmentsPageProps {
   currentUser: User;
@@ -21,14 +23,31 @@ const AssignmentsPage: React.FC<AssignmentsPageProps> = ({
     title: "",
     description: "",
     dueDate: "",
+    targetGrades: [] as string[],
   });
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title || !formData.description || !formData.dueDate) {
       addNotification("Please fill in all fields");
       return;
+    }
+
+    let fileUrl: string | undefined = undefined;
+    const file = fileRef.current?.files?.[0];
+    if (file) {
+      try {
+        setUploading(true);
+        const path = `assignments/${currentUser.id}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        fileUrl = await getDownloadURL(storageRef);
+      } finally {
+        setUploading(false);
+      }
     }
 
     if (editingAssignment) {
@@ -36,7 +55,7 @@ const AssignmentsPage: React.FC<AssignmentsPageProps> = ({
       setAssignments(prev => 
         prev.map(assignment => 
           assignment.id === editingAssignment.id 
-            ? { ...assignment, ...formData }
+            ? { ...assignment, ...formData, fileUrl: fileUrl || assignment.fileUrl }
             : assignment
         )
       );
@@ -48,14 +67,16 @@ const AssignmentsPage: React.FC<AssignmentsPageProps> = ({
         ...formData,
         teacherId: currentUser.id,
         createdAt: new Date().toISOString(),
+        fileUrl,
       };
       setAssignments(prev => [...prev, newAssignment]);
       addNotification("Assignment created successfully!");
     }
 
-    setFormData({ title: "", description: "", dueDate: "" });
+    setFormData({ title: "", description: "", dueDate: "", targetGrades: [] });
     setShowForm(false);
     setEditingAssignment(null);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const handleEdit = (assignment: Assignment) => {
@@ -64,6 +85,7 @@ const AssignmentsPage: React.FC<AssignmentsPageProps> = ({
       title: assignment.title,
       description: assignment.description,
       dueDate: assignment.dueDate,
+      targetGrades: assignment.targetGrades || [],
     });
     setShowForm(true);
   };
@@ -74,7 +96,7 @@ const AssignmentsPage: React.FC<AssignmentsPageProps> = ({
   };
 
   const handleCancel = () => {
-    setFormData({ title: "", description: "", dueDate: "" });
+    setFormData({ title: "", description: "", dueDate: "", targetGrades: [] });
     setShowForm(false);
     setEditingAssignment(null);
   };
@@ -130,6 +152,35 @@ const AssignmentsPage: React.FC<AssignmentsPageProps> = ({
                 onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Target Grades (comma separated)
+              </label>
+              <input
+                type="text"
+                value={formData.targetGrades.join(", ")}
+                onChange={(e) =>
+                  setFormData(prev => ({
+                    ...prev,
+                    targetGrades: e.target.value
+                      .split(",")
+                      .map(s => s.trim())
+                      .filter(Boolean),
+                  }))
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. 9th, 10th"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Document (optional)
+              </label>
+              <input ref={fileRef} type="file" className="block" />
+              {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
             </div>
 
             <div className="flex space-x-4">

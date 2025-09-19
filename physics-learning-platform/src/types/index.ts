@@ -1,18 +1,21 @@
 export interface User {
-  id: number;
+  id: string;
   username: string;
   email: string;
   password: string;
   userType: 'student' | 'teacher';
+  // New student metadata
+  rollNumber?: string; // unique per institution
+  classSection?: string; // optional, e.g. "10-A"
   progress?: {
     completedLessons: number;
     totalScore: number;
     quizScores: number[];
   };
   profile?: {
-    name: string;
+    name: string; // full name
     email: string;
-    grade: string;
+    grade: string; // e.g. "10th"
   };
 }
 
@@ -27,8 +30,11 @@ export interface Assignment {
   title: string;
   description: string;
   dueDate: string;
-  teacherId: number;
+  teacherId: string;
   createdAt: string;
+  // New targeting + resources
+  targetGrades?: string[]; // grades that should see the assignment
+  fileUrl?: string; // optional uploaded document URL
 }
 
 export interface Quiz {
@@ -36,7 +42,7 @@ export interface Quiz {
   title: string;
   description: string;
   questions: QuizQuestion[];
-  teacherId: number;
+  teacherId: string;
   createdAt: string;
 }
 
@@ -47,7 +53,7 @@ export interface QuizQuestion {
 }
 
 export interface AttendanceRecord {
-  studentId: number;
+  studentId: string;
   date: string;
   status: 'present' | 'absent' | 'late';
 }
