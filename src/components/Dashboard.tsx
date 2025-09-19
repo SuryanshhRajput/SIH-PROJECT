@@ -83,7 +83,23 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
 
     <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl p-8 border border-gray-100">
       <h3 className="text-2xl font-bold mb-6 text-gray-800">Quick Actions</h3>
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-3 gap-6">
+        <button
+          onClick={() => setCurrentPage("class-selection")}
+          className="group flex items-center justify-between p-6 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-xl"
+        >
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <span className="text-2xl">🎓</span>
+            </div>
+            <div className="text-left">
+              <span className="text-xl font-semibold block">Start Learning</span>
+              <span className="text-purple-100 text-sm">Choose Your Class & Subject</span>
+            </div>
+          </div>
+          <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+        </button>
+
         <button
           onClick={() => setCurrentPage("lessons")}
           className="group flex items-center justify-between p-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-xl"

@@ -22,12 +22,24 @@ const LoginPage: React.FC<LoginPageProps> = ({
 }) => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [isSignup, setIsSignup] = useState(false);
+  const [userType, setUserType] = useState<"student" | "teacher">("student");
   const [loading, setLoading] = useState(false);
   // signup fields
   const [fullName, setFullName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [rollNumber, setRollNumber] = useState("");
   const [classSection, setClassSection] = useState("");
   const [grade, setGrade] = useState("");
+
+  // Reset form when switching user types
+  const handleUserTypeChange = (type: "student" | "teacher") => {
+    setUserType(type);
+    setFullName("");
+    setContactNumber("");
+    setRollNumber("");
+    setClassSection("");
+    setGrade("");
+  };
 
   // 🔹 Firebase-powered login/signup
   const handleLogin = async (e: React.FormEvent) => {
@@ -42,20 +54,29 @@ const LoginPage: React.FC<LoginPageProps> = ({
       }
 
       if (isSignup) {
-        // Validate signup fields
-        if (!fullName.trim() || !rollNumber.trim() || !grade.trim()) {
-          setNotifications([{ id: Date.now(), message: "Please fill Full Name, Roll Number and Grade", timestamp: new Date() }]);
-          setLoading(false);
-          return;
+        // Validate signup fields based on user type
+        if (userType === "student") {
+          if (!fullName.trim() || !rollNumber.trim() || !grade.trim()) {
+            setNotifications([{ id: Date.now(), message: "Please fill Full Name, Roll Number and Grade", timestamp: new Date() }]);
+            setLoading(false);
+            return;
+          }
+          // Ensure unique roll number for students
+          const q = query(collection(db, "users"), where("rollNumber", "==", rollNumber.trim()));
+          const existing = await getDocs(q);
+          if (!existing.empty) {
+            setNotifications([{ id: Date.now(), message: "This roll number is already registered.", timestamp: new Date() }]);
+            setLoading(false);
+            return;
+          }
+        } else {
+          if (!fullName.trim() || !contactNumber.trim()) {
+            setNotifications([{ id: Date.now(), message: "Please fill Full Name and Contact Number", timestamp: new Date() }]);
+            setLoading(false);
+            return;
+          }
         }
-        // Ensure unique roll number
-        const q = query(collection(db, "users"), where("rollNumber", "==", rollNumber.trim()));
-        const existing = await getDocs(q);
-        if (!existing.empty) {
-          setNotifications([{ id: Date.now(), message: "This roll number is already registered.", timestamp: new Date() }]);
-          setLoading(false);
-          return;
-        }
+
         // Signup → Firebase auth + Firestore profile
         const userCred = await createUserWithEmailAndPassword(
           auth,
@@ -68,22 +89,35 @@ const LoginPage: React.FC<LoginPageProps> = ({
           username: fullName.trim(),
           email: loginData.email.trim(),
           password: loginData.password,
-          userType: "student",
-          rollNumber: rollNumber.trim(),
-          classSection: classSection.trim() || undefined,
-          progress: { completedLessons: 0, quizScores: [], totalScore: 0 },
+          userType: userType,
+          rollNumber: userType === "student" ? rollNumber.trim() : undefined,
+          classSection: userType === "student" ? classSection.trim() || undefined : undefined,
+          contactNumber: userType === "teacher" ? contactNumber.trim() : undefined,
+          progress: userType === "student" ? { 
+            completedLessons: 0, 
+            quizScores: [], 
+            totalScore: 0,
+            xp: 0,
+            level: 1,
+            badges: [],
+            completedChapters: [],
+            completedQuizzes: [],
+            completedGames: [],
+            streak: 0,
+            lastActiveDate: new Date().toISOString()
+          } : undefined,
           profile: {
             name: fullName.trim(),
             email: loginData.email.trim(),
-            grade: grade.trim() || "",
+            grade: userType === "student" ? grade.trim() || "" : "Teacher",
           },
         };
 
         await setDoc(doc(db, "users", newUser.id), newUser);
 
         setCurrentUser(newUser);
-        setCurrentPage("dashboard");
-        setNotifications([{ id: Date.now(), message: "Welcome! Account created successfully.", timestamp: new Date() }]);
+        setCurrentPage(userType === "teacher" ? "teacher-dashboard" : "dashboard");
+        setNotifications([{ id: Date.now(), message: `Welcome! ${userType} account created successfully.`, timestamp: new Date() }]);
       } else {
         // Login → Firebase auth + fetch profile
         const userCred = await signInWithEmailAndPassword(
@@ -194,6 +228,36 @@ const LoginPage: React.FC<LoginPageProps> = ({
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
+          {/* User Type Selection */}
+          <div className="mb-6">
+            <div className="flex space-x-2 bg-white/10 rounded-xl p-1">
+              <button
+                type="button"
+                onClick={() => handleUserTypeChange("student")}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${
+                  userType === "student"
+                    ? "bg-white text-indigo-600 shadow-lg"
+                    : "text-white/70 hover:text-white"
+                }`}
+                disabled={loading}
+              >
+                🎓 Student
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUserTypeChange("teacher")}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${
+                  userType === "teacher"
+                    ? "bg-white text-indigo-600 shadow-lg"
+                    : "text-white/70 hover:text-white"
+                }`}
+                disabled={loading}
+              >
+                👨‍🏫 Teacher
+              </button>
+            </div>
+          </div>
+
           {isSignup && (
             <>
               <div>
@@ -207,41 +271,58 @@ const LoginPage: React.FC<LoginPageProps> = ({
                   disabled={loading}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {userType === "student" ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-3">Roll Number</label>
+                      <input
+                        type="text"
+                        value={rollNumber}
+                        onChange={(e) => setRollNumber(e.target.value)}
+                        className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
+                        placeholder="Unique roll number"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-3">Class Section (optional)</label>
+                      <input
+                        type="text"
+                        value={classSection}
+                        onChange={(e) => setClassSection(e.target.value)}
+                        className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
+                        placeholder="e.g. 10-A"
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/90 mb-3">Grade</label>
+                    <input
+                      type="text"
+                      value={grade}
+                      onChange={(e) => setGrade(e.target.value)}
+                      className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
+                      placeholder="e.g. 10th"
+                      disabled={loading}
+                    />
+                  </div>
+                </>
+              ) : (
                 <div>
-                  <label className="block text-sm font-medium text-white/90 mb-3">Roll Number</label>
+                  <label className="block text-sm font-medium text-white/90 mb-3">Contact Number</label>
                   <input
-                    type="text"
-                    value={rollNumber}
-                    onChange={(e) => setRollNumber(e.target.value)}
+                    type="tel"
+                    value={contactNumber}
+                    onChange={(e) => setContactNumber(e.target.value)}
                     className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
-                    placeholder="Unique roll number"
+                    placeholder="Enter your contact number"
                     disabled={loading}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/90 mb-3">Class Section (optional)</label>
-                  <input
-                    type="text"
-                    value={classSection}
-                    onChange={(e) => setClassSection(e.target.value)}
-                    className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
-                    placeholder="e.g. 10-A"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/90 mb-3">Grade</label>
-                <input
-                  type="text"
-                  value={grade}
-                  onChange={(e) => setGrade(e.target.value)}
-                  className="w-full px-4 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300"
-                  placeholder="e.g. 10th"
-                  disabled={loading}
-                />
-              </div>
+              )}
             </>
           )}
 
@@ -276,11 +357,13 @@ const LoginPage: React.FC<LoginPageProps> = ({
             className={`w-full py-4 rounded-xl transition-all duration-300 font-semibold text-lg transform hover:scale-105 ${
               loading
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-xl"
+                : userType === "teacher" 
+                  ? "bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 shadow-xl"
+                  : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-xl"
             } text-white`}
             disabled={loading}
           >
-            {loading ? "Processing..." : isSignup ? "Create Account" : "Sign In"}
+            {loading ? "Processing..." : isSignup ? `Create ${userType === "teacher" ? "Teacher" : "Student"} Account` : "Sign In"}
           </button>
         </form>
 
@@ -290,7 +373,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
             className="text-white/80 hover:text-white text-sm mb-6 transition-colors duration-300"
             disabled={loading}
           >
-            {isSignup ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+            {isSignup ? `Already have a ${userType} account? Sign in` : `Don't have a ${userType} account? Sign up`}
           </button>
         </div>
 
