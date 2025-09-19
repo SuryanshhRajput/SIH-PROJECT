@@ -26,6 +26,11 @@ import StudentsPage from "./components/StudentsPage";
 import { getDoc } from "firebase/firestore";
 import AIChat from "./components/AIChat";
 import AIChatPage from "./components/AIChatPage";
+import ClassSelection from "./components/ClassSelection";
+import SubjectDashboard from "./components/SubjectDashboard";
+import ChapterView from "./components/ChapterView";
+import GamificationSystem from "./components/GamificationSystem";
+import { Class, Subject, UserProgress } from "./types";
 
 const PhysicsLearningPlatform = () => {
   // Global State
@@ -37,6 +42,11 @@ const PhysicsLearningPlatform = () => {
   const [customQuizzes, setCustomQuizzes] = useState<Quiz[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [studyNotes] = useState<StudyNote[]>([]);
+  
+  // Hierarchical Navigation State
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [navigationStack, setNavigationStack] = useState<string[]>([]);
   
   // Animation state for lessons
   const [animationState, setAnimationState] = useState<AnimationState>({
@@ -85,6 +95,73 @@ const PhysicsLearningPlatform = () => {
       timestamp: new Date(),
     };
     setNotifications((prev) => [...prev, newNotification]);
+  };
+
+  // Hierarchical Navigation Handlers
+  const handleClassSelect = (classId: number) => {
+    const classes: Class[] = [
+      { id: 6, name: "Class 6", grade: 6, theme: { primary: "from-blue-500 to-cyan-500", secondary: "from-blue-600 to-cyan-600", icon: "🎓" } },
+      { id: 7, name: "Class 7", grade: 7, theme: { primary: "from-green-500 to-emerald-500", secondary: "from-green-600 to-emerald-600", icon: "📘" } },
+      { id: 8, name: "Class 8", grade: 8, theme: { primary: "from-purple-500 to-violet-500", secondary: "from-purple-600 to-violet-600", icon: "📚" } },
+      { id: 9, name: "Class 9", grade: 9, theme: { primary: "from-orange-500 to-red-500", secondary: "from-orange-600 to-red-600", icon: "🔬" } },
+      { id: 10, name: "Class 10", grade: 10, theme: { primary: "from-pink-500 to-rose-500", secondary: "from-pink-600 to-rose-600", icon: "⚗️" } },
+      { id: 11, name: "Class 11", grade: 11, theme: { primary: "from-indigo-500 to-blue-500", secondary: "from-indigo-600 to-blue-600", icon: "🧮" } },
+      { id: 12, name: "Class 12", grade: 12, theme: { primary: "from-red-500 to-pink-500", secondary: "from-red-600 to-pink-600", icon: "🎯" } }
+    ];
+    
+    const selectedClass = classes.find(c => c.id === classId);
+    if (selectedClass) {
+      setSelectedClass(selectedClass);
+      setCurrentPage("subject-dashboard");
+      setNavigationStack(["class-selection"]);
+    }
+  };
+
+  const handleSubjectSelect = (subjectId: number) => {
+    const subjects: Subject[] = [
+      { id: 1, name: "Mathematics", classId: selectedClass?.id || 6, icon: "🧮", color: "from-blue-500 to-indigo-600", description: "Numbers, shapes, and problem solving" },
+      { id: 2, name: "Science", classId: selectedClass?.id || 6, icon: "🔬", color: "from-green-500 to-emerald-600", description: "Explore the world around us" },
+      { id: 3, name: "English", classId: selectedClass?.id || 6, icon: "📚", color: "from-purple-500 to-violet-600", description: "Language and literature" },
+      { id: 4, name: "Social Studies", classId: selectedClass?.id || 6, icon: "🌍", color: "from-orange-500 to-red-600", description: "History, geography, and civics" },
+      { id: 5, name: "Art & Craft", classId: selectedClass?.id || 6, icon: "🎨", color: "from-pink-500 to-rose-600", description: "Creative expression and skills" },
+      { id: 6, name: "Physical Education", classId: selectedClass?.id || 6, icon: "⚽", color: "from-yellow-500 to-orange-600", description: "Sports and physical fitness" }
+    ];
+    
+    const selectedSubject = subjects.find(s => s.id === subjectId);
+    if (selectedSubject) {
+      setSelectedSubject(selectedSubject);
+      setCurrentPage("chapter-view");
+      setNavigationStack(prev => [...prev, "subject-dashboard"]);
+    }
+  };
+
+  const handleBackToClasses = () => {
+    setSelectedClass(null);
+    setSelectedSubject(null);
+    setCurrentPage("class-selection");
+    setNavigationStack([]);
+  };
+
+  const handleBackToSubjects = () => {
+    setSelectedSubject(null);
+    setCurrentPage("subject-dashboard");
+    setNavigationStack(prev => prev.slice(0, -1));
+  };
+
+  const handleChapterComplete = (chapterId: number, xp: number) => {
+    if (currentUser) {
+      const updatedUser = {
+        ...currentUser,
+        progress: {
+          ...currentUser.progress,
+          xp: (currentUser.progress?.xp || 0) + xp,
+          level: Math.floor(((currentUser.progress?.xp || 0) + xp) / 1000) + 1,
+          completedChapters: [...(currentUser.progress?.completedChapters || []), chapterId]
+        }
+      };
+      setCurrentUser(updatedUser);
+      addNotification(`Great job! You earned ${xp} XP for completing the chapter! 🎉`);
+    }
   };
   
   useEffect(() => {
@@ -142,8 +219,49 @@ const PhysicsLearningPlatform = () => {
       {/* Student Pages */}
       {currentUser.userType === "student" && (
         <>
+          {/* Hierarchical Navigation Pages */}
+          {currentPage === "class-selection" && (
+            <ClassSelection 
+              onClassSelect={handleClassSelect} 
+              currentUser={currentUser} 
+            />
+          )}
+          {currentPage === "subject-dashboard" && selectedClass && (
+            <SubjectDashboard 
+              selectedClass={selectedClass}
+              onSubjectSelect={handleSubjectSelect}
+              onBack={handleBackToClasses}
+              currentUser={currentUser}
+            />
+          )}
+          {currentPage === "chapter-view" && selectedClass && selectedSubject && (
+            <ChapterView 
+              selectedClass={selectedClass}
+              selectedSubject={selectedSubject}
+              onBack={handleBackToSubjects}
+              currentUser={currentUser}
+              onChapterComplete={handleChapterComplete}
+            />
+          )}
+          
+          {/* Original Dashboard and Pages */}
           {currentPage === "dashboard" && (
-            <Dashboard currentUser={currentUser} setCurrentPage={setCurrentPage} />
+            <div className="space-y-6">
+              <Dashboard currentUser={currentUser} setCurrentPage={setCurrentPage} />
+              <div className="max-w-7xl mx-auto p-6">
+                <GamificationSystem 
+                  currentUser={currentUser} 
+                  onProgressUpdate={(progress) => {
+                    if (currentUser) {
+                      setCurrentUser({
+                        ...currentUser,
+                        progress: { ...currentUser.progress, ...progress }
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
           )}
           {currentPage === "lessons" && (
             <LessonsPage
