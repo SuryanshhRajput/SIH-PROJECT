@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Target } from "lucide-react";
 import { User, Notification } from "../types";
 import { auth, db } from "../firebaseConfig";
@@ -10,6 +10,7 @@ interface LoginPageProps {
   setCurrentPage: (page: string) => void;
   users: User[];
   setUsers: (users: User[]) => void;
+  notifications: Notification[];
   setNotifications: (notifications: Notification[]) => void;
 }
 
@@ -18,6 +19,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
   setCurrentPage,
   users,
   setUsers,
+  notifications,
   setNotifications,
 }) => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -30,6 +32,16 @@ const LoginPage: React.FC<LoginPageProps> = ({
   const [rollNumber, setRollNumber] = useState("");
   const [classSection, setClassSection] = useState("");
   const [grade, setGrade] = useState("");
+
+  // Auto-dismiss notifications after 5 seconds
+  useEffect(() => {
+    if (notifications.length > 0) {
+      const timer = setTimeout(() => {
+        setNotifications([]);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notifications]);
 
   // Reset form when switching user types
   const handleUserTypeChange = (type: "student" | "teacher") => {
@@ -45,6 +57,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    console.log("Login attempt started", { isSignup, userType, loginData });
 
     try {
       if (!loginData.email.trim() || !loginData.password.trim()) {
@@ -118,6 +131,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         setCurrentUser(newUser);
         setCurrentPage(userType === "teacher" ? "teacher-dashboard" : "dashboard");
         setNotifications([{ id: Date.now(), message: `Welcome! ${userType} account created successfully.`, timestamp: new Date() }]);
+        console.log("Signup successful", newUser);
       } else {
         // Login → Firebase auth + fetch profile
         const userCred = await signInWithEmailAndPassword(
@@ -134,11 +148,30 @@ const LoginPage: React.FC<LoginPageProps> = ({
             userData.userType === "teacher" ? "teacher-dashboard" : "dashboard"
           );
           setNotifications([{ id: Date.now(), message: "Welcome back!", timestamp: new Date() }]);
+          console.log("Login successful", userData);
+        } else {
+          setNotifications([{ id: Date.now(), message: "User profile not found. Please contact support.", timestamp: new Date() }]);
         }
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      setNotifications([{ id: Date.now(), message: error.message || "An error occurred. Please try again.", timestamp: new Date() }]);
+      let errorMessage = "An error occurred. Please try again.";
+      
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = "No account found with this email address.";
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = "Incorrect password. Please try again.";
+      } else if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "An account with this email already exists. Please sign in instead.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password should be at least 6 characters long.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setNotifications([{ id: Date.now(), message: errorMessage, timestamp: new Date() }]);
     } finally {
       setLoading(false);
     }
@@ -259,6 +292,20 @@ const LoginPage: React.FC<LoginPageProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Notifications */}
+      {notifications.length > 0 && (
+        <div className="fixed top-4 right-4 z-50 space-y-2">
+          {notifications.map((notification) => (
+            <div
+              key={notification.id}
+              className="bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg max-w-sm animate-pulse"
+            >
+              {notification.message}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>

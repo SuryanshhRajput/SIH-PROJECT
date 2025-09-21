@@ -207,6 +207,7 @@ const PhysicsLearningPlatform = () => {
         setCurrentPage={setCurrentPage}
         users={users}
         setUsers={setUsers}
+        notifications={notifications}
         setNotifications={setNotifications}
       />
     );
