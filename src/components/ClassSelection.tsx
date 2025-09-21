@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronRight, GraduationCap, BookOpen, Calculator, Atom, Globe, Palette } from "lucide-react";
+import { ChevronRight, BookOpen, Calculator, Atom, Globe, Palette } from "lucide-react";
 import { Class } from "../types";
 
 interface ClassSelectionProps {

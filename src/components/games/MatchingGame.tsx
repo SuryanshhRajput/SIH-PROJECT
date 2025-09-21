@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { RotateCcw, CheckCircle, XCircle, Star } from "lucide-react";
+import { RotateCcw, XCircle, Star } from "lucide-react";
 
 interface MatchingItem {
   id: number;
@@ -19,7 +19,7 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ items, onComplete, onClose 
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [matches, setMatches] = useState(0);
   const [moves, setMoves] = useState(0);
-  const [gameComplete, setGameComplete] = useState(false);
+  const [, setGameComplete] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
   // Initialize game items

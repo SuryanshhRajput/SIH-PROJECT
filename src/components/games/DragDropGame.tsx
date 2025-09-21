@@ -26,7 +26,7 @@ const DragDropGame: React.FC<DragDropGameProps> = ({ items, onComplete, onClose 
   const [dragItems, setDragItems] = useState<DragItem[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
   const [draggedItem, setDraggedItem] = useState<DragItem | null>(null);
-  const [gameComplete, setGameComplete] = useState(false);
+  const [, setGameComplete] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [moves, setMoves] = useState(0);
 

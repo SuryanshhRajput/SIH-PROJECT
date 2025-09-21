@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, Plus, MessageSquare, Bot, Target, ArrowLeft } from "lucide-react";
+import { Send, Plus, Bot } from "lucide-react";
 
 type ChatMessage = {
   id: string;

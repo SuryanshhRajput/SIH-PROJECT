@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { 
   ArrowLeft, 
-  BookOpen, 
   Play, 
   Trophy, 
   Gamepad2, 
-  Bot, 
   FileText, 
   Clock,
   Star,
-  CheckCircle,
-  Lock
+  CheckCircle
 } from "lucide-react";
 import { Chapter, Subject, Class, AINotification } from "../types";
-import AIChat from "./AIChat";
 import MatchingGame from "./games/MatchingGame";
 import DragDropGame from "./games/DragDropGame";
 import ProjectileGame from "./games/ProjectileGame";
@@ -121,7 +117,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
   const [chapters] = useState<Chapter[]>(mockChapters);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
-  const [aiNotifications, setAiNotifications] = useState<AINotification[]>([]);
+  const [, setAiNotifications] = useState<AINotification[]>([]);
   const [selectedGame, setSelectedGame] = useState<{ id: number; type: string; title: string } | null>(null);
 
   // Show welcome popup when a chapter is selected
@@ -358,14 +354,6 @@ const ChapterView: React.FC<ChapterViewProps> = ({
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* AI Chat */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-              <div className="flex items-center space-x-3 mb-4">
-                <Bot className="w-8 h-8 text-indigo-600" />
-                <h2 className="text-xl font-bold text-gray-800">AI Helper</h2>
-              </div>
-              <AIChat mode="page" topic={selectedChapter.title} />
-            </div>
 
             {/* Fun Facts */}
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-6 text-white">

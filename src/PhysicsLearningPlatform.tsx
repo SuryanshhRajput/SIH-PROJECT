@@ -30,7 +30,7 @@ import ClassSelection from "./components/ClassSelection";
 import SubjectDashboard from "./components/SubjectDashboard";
 import ChapterView from "./components/ChapterView";
 import GamificationSystem from "./components/GamificationSystem";
-import { Class, Subject, UserProgress } from "./types";
+import { Class, Subject } from "./types";
 
 const PhysicsLearningPlatform = () => {
   // Global State

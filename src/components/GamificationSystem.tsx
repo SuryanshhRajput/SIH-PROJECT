@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Trophy, Star, Award, Target, Zap, Crown, Medal, Shield } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Trophy, Star, Award, Crown, Medal } from "lucide-react";
 import { UserProgress, Badge, LeaderboardEntry } from "../types";
 
 interface GamificationSystemProps {
@@ -22,19 +22,8 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
     lastActiveDate: currentUser?.progress?.lastActiveDate || new Date().toISOString()
   });
 
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboard] = useState<LeaderboardEntry[]>([]);
   const [showBadges, setShowBadges] = useState(false);
-
-  // Expose functions to parent components
-  useEffect(() => {
-    (window as any).gamificationSystem = {
-      completeChapter,
-      completeQuiz,
-      completeGame,
-      addXP,
-      updateStreak
-    };
-  }, []);
 
   // Calculate level from XP
   const calculateLevel = (xp: number) => {
@@ -163,7 +152,7 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
   };
 
   // Add XP and check for level up
-  const addXP = (amount: number, source: 'chapter' | 'quiz' | 'game') => {
+  const addXP = useCallback((amount: number, source: 'chapter' | 'quiz' | 'game') => {
     const newXP = progress.xp + amount;
     const newLevel = calculateLevel(newXP);
     const levelUp = newLevel > progress.level;
@@ -196,10 +185,10 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
         console.log(`New badge earned: ${badge.name}!`);
       });
     }
-  };
+  }, [progress, onProgressUpdate, checkForNewBadges]);
 
   // Complete chapter
-  const completeChapter = (chapterId: number) => {
+  const completeChapter = useCallback((chapterId: number) => {
     if (!progress.completedChapters.includes(chapterId)) {
       const newProgress = {
         ...progress,
@@ -209,10 +198,10 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
       onProgressUpdate(newProgress);
       addXP(50, 'chapter');
     }
-  };
+  }, [progress, onProgressUpdate, addXP]);
 
   // Complete quiz
-  const completeQuiz = (quizId: number) => {
+  const completeQuiz = useCallback((quizId: number) => {
     if (!progress.completedQuizzes.includes(quizId)) {
       const newProgress = {
         ...progress,
@@ -222,10 +211,10 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
       onProgressUpdate(newProgress);
       addXP(100, 'quiz');
     }
-  };
+  }, [progress, onProgressUpdate, addXP]);
 
   // Complete game
-  const completeGame = (gameId: number) => {
+  const completeGame = useCallback((gameId: number) => {
     if (!progress.completedGames.includes(gameId)) {
       const newProgress = {
         ...progress,
@@ -235,10 +224,10 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
       onProgressUpdate(newProgress);
       addXP(150, 'game');
     }
-  };
+  }, [progress, onProgressUpdate, addXP]);
 
   // Update streak
-  const updateStreak = () => {
+  const updateStreak = useCallback(() => {
     const today = new Date().toDateString();
     const lastActive = new Date(progress.lastActiveDate).toDateString();
     const yesterday = new Date();
@@ -261,7 +250,7 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
     };
     setProgress(newProgress);
     onProgressUpdate(newProgress);
-  };
+  }, [progress, onProgressUpdate]);
 
   const getLevelTitle = (level: number) => {
     if (level >= 20) return "Legendary Scholar";
@@ -278,6 +267,17 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
     if (level >= 5) return <Award className="w-6 h-6 text-blue-500" />;
     return <Star className="w-6 h-6 text-green-500" />;
   };
+
+  // Expose functions to parent components
+  useEffect(() => {
+    (window as any).gamificationSystem = {
+      completeChapter,
+      completeQuiz,
+      completeGame,
+      addXP,
+      updateStreak
+    };
+  }, [completeChapter, completeQuiz, completeGame, addXP, updateStreak]);
 
   return (
     <div className="space-y-6">

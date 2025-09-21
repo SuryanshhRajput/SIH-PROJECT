@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronRight, ArrowLeft, BookOpen, Calculator, Atom, Globe, Palette, Music, Paintbrush, Dumbbell } from "lucide-react";
+import { ChevronRight, ArrowLeft, BookOpen, Calculator, Atom, Globe, Palette, Dumbbell } from "lucide-react";
 import { Subject, Class } from "../types";
 
 interface SubjectDashboardProps {
