@@ -152,7 +152,19 @@ const LoginPage: React.FC<LoginPageProps> = ({
       email: "demo@example.com",
       password: "demo123",
       userType: "student",
-      progress: { completedLessons: 2, quizScores: [80, 90], totalScore: 85 },
+      progress: { 
+        completedLessons: 2, 
+        quizScores: [80, 90], 
+        totalScore: 85,
+        xp: 150,
+        level: 2,
+        badges: [],
+        completedChapters: [1, 2],
+        completedQuizzes: [1, 2],
+        completedGames: [],
+        streak: 3,
+        lastActiveDate: new Date().toISOString()
+      },
       profile: { name: "Demo Student", email: "demo@example.com", grade: "10th" },
     };
 
@@ -180,7 +192,19 @@ const LoginPage: React.FC<LoginPageProps> = ({
         email: "alice@student.com",
         password: "alice123",
         userType: "student",
-        progress: { completedLessons: 3, quizScores: [85, 92, 78], totalScore: 85 },
+        progress: { 
+          completedLessons: 3, 
+          quizScores: [85, 92, 78], 
+          totalScore: 85,
+          xp: 200,
+          level: 3,
+          badges: [],
+          completedChapters: [1, 2, 3],
+          completedQuizzes: [1, 2, 3],
+          completedGames: [1],
+          streak: 5,
+          lastActiveDate: new Date().toISOString()
+        },
         profile: { name: "Alice Smith", email: "alice@student.com", grade: "10th" },
       },
       {
@@ -189,7 +213,19 @@ const LoginPage: React.FC<LoginPageProps> = ({
         email: "bob@student.com",
         password: "bob123",
         userType: "student",
-        progress: { completedLessons: 2, quizScores: [70, 88], totalScore: 79 },
+        progress: { 
+          completedLessons: 2, 
+          quizScores: [70, 88], 
+          totalScore: 79,
+          xp: 120,
+          level: 2,
+          badges: [],
+          completedChapters: [1, 2],
+          completedQuizzes: [1, 2],
+          completedGames: [],
+          streak: 2,
+          lastActiveDate: new Date().toISOString()
+        },
         profile: { name: "Bob Johnson", email: "bob@student.com", grade: "10th" },
       },
       {
@@ -198,7 +234,19 @@ const LoginPage: React.FC<LoginPageProps> = ({
         email: "carol@student.com",
         password: "carol123",
         userType: "student",
-        progress: { completedLessons: 4, quizScores: [95, 87, 91, 89], totalScore: 90 },
+        progress: { 
+          completedLessons: 4, 
+          quizScores: [95, 87, 91, 89], 
+          totalScore: 90,
+          xp: 300,
+          level: 4,
+          badges: [],
+          completedChapters: [1, 2, 3, 4],
+          completedQuizzes: [1, 2, 3, 4],
+          completedGames: [1, 2],
+          streak: 7,
+          lastActiveDate: new Date().toISOString()
+        },
         profile: { name: "Carol Davis", email: "carol@student.com", grade: "10th" },
       },
     ];

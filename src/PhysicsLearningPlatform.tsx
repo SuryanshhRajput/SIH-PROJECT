@@ -153,10 +153,17 @@ const PhysicsLearningPlatform = () => {
       const updatedUser = {
         ...currentUser,
         progress: {
-          ...currentUser.progress,
+          completedLessons: currentUser.progress?.completedLessons || 0,
+          totalScore: currentUser.progress?.totalScore || 0,
+          quizScores: currentUser.progress?.quizScores || [],
           xp: (currentUser.progress?.xp || 0) + xp,
           level: Math.floor(((currentUser.progress?.xp || 0) + xp) / 1000) + 1,
-          completedChapters: [...(currentUser.progress?.completedChapters || []), chapterId]
+          badges: currentUser.progress?.badges || [],
+          completedChapters: [...(currentUser.progress?.completedChapters || []), chapterId],
+          completedQuizzes: currentUser.progress?.completedQuizzes || [],
+          completedGames: currentUser.progress?.completedGames || [],
+          streak: currentUser.progress?.streak || 0,
+          lastActiveDate: currentUser.progress?.lastActiveDate || new Date().toISOString()
         }
       };
       setCurrentUser(updatedUser);
@@ -206,7 +213,7 @@ const PhysicsLearningPlatform = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
       {/* Navbar */}
       <Navigation
         currentUser={currentUser}
@@ -255,7 +262,12 @@ const PhysicsLearningPlatform = () => {
                     if (currentUser) {
                       setCurrentUser({
                         ...currentUser,
-                        progress: { ...currentUser.progress, ...progress }
+                        progress: { 
+                          completedLessons: currentUser.progress?.completedLessons || 0,
+                          totalScore: currentUser.progress?.totalScore || 0,
+                          quizScores: currentUser.progress?.quizScores || [],
+                          ...progress
+                        }
                       });
                     }
                   }}

@@ -44,6 +44,14 @@ const QuizPage: React.FC<QuizPageProps> = ({
         completedLessons: currentUser.progress?.completedLessons || 0,
         totalScore: score,
         quizScores: [...(currentUser.progress?.quizScores || []), score],
+        xp: currentUser.progress?.xp || 0,
+        level: currentUser.progress?.level || 1,
+        badges: currentUser.progress?.badges || [],
+        completedChapters: currentUser.progress?.completedChapters || [],
+        completedQuizzes: currentUser.progress?.completedQuizzes || [],
+        completedGames: currentUser.progress?.completedGames || [],
+        streak: currentUser.progress?.streak || 0,
+        lastActiveDate: currentUser.progress?.lastActiveDate || new Date().toISOString(),
       },
     };
     setCurrentUser(updatedUser);

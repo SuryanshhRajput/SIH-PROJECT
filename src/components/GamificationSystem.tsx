@@ -25,6 +25,17 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [showBadges, setShowBadges] = useState(false);
 
+  // Expose functions to parent components
+  useEffect(() => {
+    (window as any).gamificationSystem = {
+      completeChapter,
+      completeQuiz,
+      completeGame,
+      addXP,
+      updateStreak
+    };
+  }, []);
+
   // Calculate level from XP
   const calculateLevel = (xp: number) => {
     return Math.floor(xp / 1000) + 1;
@@ -367,19 +378,6 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
         )}
       </div>
 
-      {/* Export functions for parent components */}
-      <div style={{ display: 'none' }}>
-        {React.useEffect(() => {
-          // Expose functions to parent
-          (window as any).gamificationSystem = {
-            completeChapter,
-            completeQuiz,
-            completeGame,
-            addXP,
-            updateStreak
-          };
-        }, [])}
-      </div>
     </div>
   );
 };

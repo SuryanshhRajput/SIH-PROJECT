@@ -95,6 +95,14 @@ const LessonsPage: React.FC<LessonsPageProps> = ({ animationState, setAnimationS
                   completedLessons: Math.min((currentUser.progress?.completedLessons || 0) + 1, 5),
                   totalScore: currentUser.progress?.totalScore || 0,
                   quizScores: currentUser.progress?.quizScores || [],
+                  xp: currentUser.progress?.xp || 0,
+                  level: currentUser.progress?.level || 1,
+                  badges: currentUser.progress?.badges || [],
+                  completedChapters: currentUser.progress?.completedChapters || [],
+                  completedQuizzes: currentUser.progress?.completedQuizzes || [],
+                  completedGames: currentUser.progress?.completedGames || [],
+                  streak: currentUser.progress?.streak || 0,
+                  lastActiveDate: currentUser.progress?.lastActiveDate || new Date().toISOString(),
                 },
               };
               setCurrentUser(updatedUser);

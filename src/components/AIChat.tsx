@@ -15,6 +15,7 @@ interface AIChatProps {
 
 const AIChat: React.FC<AIChatProps> = ({ mode = "floating", topic }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
@@ -111,7 +112,7 @@ const AIChat: React.FC<AIChatProps> = ({ mode = "floating", topic }) => {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50">
+    <div className="fixed bottom-4 right-4 z-50">
       {/* Floating Button */}
       {mode === "floating" && !isOpen && (
         <button
@@ -120,7 +121,7 @@ const AIChat: React.FC<AIChatProps> = ({ mode = "floating", topic }) => {
           aria-label="Open AI Chat"
         >
           {/* Doraemon-like simple SVG icon */}
-          <svg width="60" height="60" viewBox="0 0 120 120">
+          <svg width="50" height="50" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="58" fill="#2b7fff" />
             <circle cx="60" cy="65" r="40" fill="#ffffff" />
             <circle cx="45" cy="55" r="8" fill="#000000" />
@@ -133,58 +134,82 @@ const AIChat: React.FC<AIChatProps> = ({ mode = "floating", topic }) => {
 
       {/* Chat Window */}
       {(mode === "page" || isOpen) && (
-        <div className={`${mode === 'page' ? 'w-full h-[70vh]' : 'w-[340px] sm:w-[380px] h-[500px]'} bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden`}>
+        <div className={`${mode === 'page' ? 'w-full h-[70vh]' : isMinimized ? 'w-[280px] h-[50px]' : 'w-[300px] sm:w-[350px] h-[350px] sm:h-[400px]'} bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden transition-all duration-300`}>
           {/* Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-between">
-            <div className="font-semibold">Ask VidyaVerse AI 🤖</div>
-            {mode === "floating" && (
-              <button onClick={() => setIsOpen(false)} className="text-white/90 hover:text-white">✖</button>
-            )}
+            <div className="font-semibold text-sm sm:text-base">Ask VidyaVerse AI 🤖</div>
+            <div className="flex items-center gap-2">
+              {mode === "floating" && (
+                <>
+                  <button 
+                    onClick={() => setIsMinimized(!isMinimized)} 
+                    className="text-white/90 hover:text-white text-lg p-1 rounded hover:bg-white/20 transition-colors"
+                    aria-label={isMinimized ? "Maximize" : "Minimize"}
+                  >
+                    {isMinimized ? "⬆" : "⬇"}
+                  </button>
+                  <button 
+                    onClick={() => setIsOpen(false)} 
+                    className="text-white/90 hover:text-white text-lg p-1 rounded hover:bg-white/20 transition-colors"
+                    aria-label="Close"
+                  >
+                    ✖
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-            {messages.length === 0 && (
-              <div className="text-sm text-gray-600">
-                Tip: Ask things like "Explain gravity like I’m 10" or "Help me solve F = ma problems".
-              </div>
-            )}
-            {messages.map((m) => (
-              <div key={m.id} className={`max-w-[85%] p-3 rounded-xl shadow-sm ${m.role === 'user' ? 'bg-indigo-600 text-white self-end ml-auto' : 'bg-white text-gray-800 border border-gray-200'} `}>
-                {m.role === 'assistant' ? (
-                  <div dangerouslySetInnerHTML={{ __html: formatForDisplay(m.content) }} />
-                ) : (
-                  <div className="whitespace-pre-wrap">{m.content}</div>
-                )}
-              </div>
-            ))}
-            {loading && (
-              <div className="text-sm text-gray-600">Thinking… ✨</div>
-            )}
-            {error && (
-              <div className="text-sm text-red-600">{error}</div>
-            )}
-          </div>
+          {/* Messages - Only show when not minimized */}
+          {!isMinimized && (
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+              {messages.length === 0 && (
+                <div className="text-sm text-gray-600">
+                  Tip: Ask things like "Explain gravity like I'm 10" or "Help me solve F = ma problems".
+                </div>
+              )}
+              {messages.map((m) => (
+                <div key={m.id} className={`max-w-[85%] p-3 rounded-xl shadow-sm ${m.role === 'user' ? 'bg-indigo-600 text-white self-end ml-auto' : 'bg-white text-gray-800 border border-gray-200'} `}>
+                  {m.role === 'assistant' ? (
+                    <div dangerouslySetInnerHTML={{ __html: formatForDisplay(m.content) }} />
+                  ) : (
+                    <div className="whitespace-pre-wrap">{m.content}</div>
+                  )}
+                </div>
+              ))}
+              {loading && (
+                <div className="text-sm text-gray-600">Thinking… ✨</div>
+              )}
+              {error && (
+                <div className="text-sm text-red-600">{error}</div>
+              )}
+            </div>
+          )}
 
-          {/* Input */}
-          <div className="p-3 bg-white border-t border-gray-200 flex items-center gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder="Ask a physics question…"
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
-              disabled={loading}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={loading}
-              className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-60"
-            >
-              Send
-            </button>
-          </div>
+          {/* Input - Only show when not minimized */}
+          {!isMinimized && (
+            <div className="p-3 bg-white border-t border-gray-200 flex items-center gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="Ask a physics question…"
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"
+                disabled={loading}
+              />
+              <button
+                onClick={sendMessage}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-60 text-sm flex items-center gap-1"
+              >
+                <span>Send</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

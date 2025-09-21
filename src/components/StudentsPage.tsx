@@ -79,6 +79,14 @@ const StudentsPage: React.FC<StudentsPageProps> = ({
               completedLessons: user.progress?.completedLessons || 0,
               totalScore: user.progress?.totalScore || 0,
               quizScores: user.progress?.quizScores || [],
+              xp: user.progress?.xp || 0,
+              level: user.progress?.level || 1,
+              badges: user.progress?.badges || [],
+              completedChapters: user.progress?.completedChapters || [],
+              completedQuizzes: user.progress?.completedQuizzes || [],
+              completedGames: user.progress?.completedGames || [],
+              streak: user.progress?.streak || 0,
+              lastActiveDate: user.progress?.lastActiveDate || new Date().toISOString(),
               [field]: value
             }
           }

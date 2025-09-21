@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import { Chapter, Subject, Class, AINotification } from "../types";
 import AIChat from "./AIChat";
+import MatchingGame from "./games/MatchingGame";
+import DragDropGame from "./games/DragDropGame";
+import ProjectileGame from "./games/ProjectileGame";
 
 interface ChapterViewProps {
   selectedClass: Class;
@@ -119,6 +122,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [aiNotifications, setAiNotifications] = useState<AINotification[]>([]);
+  const [selectedGame, setSelectedGame] = useState<{ id: number; type: string; title: string } | null>(null);
 
   // Show welcome popup when a chapter is selected
   useEffect(() => {
@@ -168,6 +172,71 @@ const ChapterView: React.FC<ChapterViewProps> = ({
   const handleCompleteActivity = (xp: number) => {
     onChapterComplete(selectedChapter!.id, xp);
   };
+
+  const handleGameSelect = (game: { id: number; type: string; title: string }) => {
+    setSelectedGame(game);
+  };
+
+  const handleGameComplete = (xp: number) => {
+    onChapterComplete(selectedChapter!.id, xp);
+    setSelectedGame(null);
+  };
+
+  const handleBackToChapter = () => {
+    setSelectedGame(null);
+  };
+
+  // Render selected game
+  if (selectedGame) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="mb-6">
+          <button
+            onClick={handleBackToChapter}
+            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-4 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Chapter</span>
+          </button>
+          
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white shadow-2xl">
+            <h1 className="text-3xl font-bold drop-shadow-lg">{selectedGame.title}</h1>
+            <p className="text-white/90">Have fun while learning!</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+          {selectedGame.type === "matching" && (
+            <MatchingGame 
+              items={[
+                { left: "Speed", right: "Distance/Time" },
+                { left: "Velocity", right: "Speed + Direction" },
+                { left: "Acceleration", right: "Change in Velocity" },
+                { left: "Force", right: "Mass × Acceleration" }
+              ]}
+              onComplete={() => handleGameComplete(150)} 
+              onClose={handleBackToChapter}
+            />
+          )}
+          {selectedGame.type === "drag-drop" && (
+            <DragDropGame 
+              items={[
+                { item: "F = ma", target: "Newton's Second Law" },
+                { item: "v = u + at", target: "Velocity Formula" },
+                { item: "s = ut + ½at²", target: "Displacement Formula" },
+                { item: "E = mc²", target: "Einstein's Mass-Energy" }
+              ]}
+              onComplete={() => handleGameComplete(180)} 
+              onClose={handleBackToChapter}
+            />
+          )}
+          {selectedGame.type === "projectile" && (
+            <ProjectileGame goBack={handleBackToChapter} />
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (selectedChapter) {
     return (
@@ -275,7 +344,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
                         </div>
                       </div>
                       <button
-                        onClick={() => handleCompleteActivity(game.xpReward)}
+                        onClick={() => handleGameSelect(game)}
                         className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
                       >
                         Play Game
