@@ -1,4 +1,5 @@
 import React from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 import { ChevronRight, ArrowLeft, BookOpen, Calculator, Atom, Globe, Palette, Dumbbell } from "lucide-react";
 import { Subject, Class } from "../types";
 
@@ -66,6 +67,8 @@ const SubjectDashboard: React.FC<SubjectDashboardProps> = ({
   onBack, 
   currentUser 
 }) => {
+  const { t } = useLanguage();
+
   const getSubjectIcon = (subjectName: string) => {
     const iconMap: { [key: string]: React.ReactNode } = {
       "Mathematics": <Calculator className="w-8 h-8" />,
@@ -94,7 +97,7 @@ const SubjectDashboard: React.FC<SubjectDashboardProps> = ({
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-4 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Back to Classes</span>
+          <span>{t('subject.back_classes')}</span>
         </button>
         
         <div className={`bg-gradient-to-r ${selectedClass.theme.primary} rounded-2xl p-8 text-white shadow-2xl`}>
@@ -102,7 +105,7 @@ const SubjectDashboard: React.FC<SubjectDashboardProps> = ({
             <div className="text-6xl">{selectedClass.theme.icon}</div>
             <div>
               <h1 className="text-4xl font-bold drop-shadow-lg">{selectedClass.name}</h1>
-              <p className="text-xl text-white/90">Choose a subject to continue learning</p>
+              <p className="text-xl text-white/90">{t('subject.choose')}</p>
             </div>
           </div>
           
@@ -110,15 +113,15 @@ const SubjectDashboard: React.FC<SubjectDashboardProps> = ({
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-white/20 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold">0</div>
-              <div className="text-sm text-white/80">Chapters Completed</div>
+              <div className="text-sm text-white/80">{t('subject.chapters_completed')}</div>
             </div>
             <div className="bg-white/20 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold">0</div>
-              <div className="text-sm text-white/80">XP Earned</div>
+              <div className="text-sm text-white/80">{t('subject.xp_earned')}</div>
             </div>
             <div className="bg-white/20 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold">0</div>
-              <div className="text-sm text-white/80">Badges</div>
+              <div className="text-sm text-white/80">{t('subject.badges')}</div>
             </div>
           </div>
         </div>
@@ -150,7 +153,7 @@ const SubjectDashboard: React.FC<SubjectDashboardProps> = ({
               {/* Progress Bar */}
               <div className="mb-4">
                 <div className="flex justify-between text-white/80 text-sm mb-1">
-                  <span>Progress</span>
+                  <span>{t('subject.progress')}</span>
                   <span>0%</span>
                 </div>
                 <div className="w-full bg-white/20 rounded-full h-2">
@@ -160,13 +163,13 @@ const SubjectDashboard: React.FC<SubjectDashboardProps> = ({
 
               {/* Chapter Count */}
               <div className="flex items-center justify-between text-white/80 text-sm mb-4">
-                <span>Chapters Available</span>
+                <span>{t('subject.chapters_available')}</span>
                 <span className="font-semibold">5</span>
               </div>
 
               {/* Action Button */}
               <div className="flex items-center justify-center space-x-2 text-white group-hover:text-white/90">
-                <span className="font-semibold">Enter Subject</span>
+                <span className="font-semibold">{t('subject.enter')}</span>
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -177,23 +180,23 @@ const SubjectDashboard: React.FC<SubjectDashboardProps> = ({
       {/* Quick Stats */}
       <div className="mt-12">
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">Your Learning Journey</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">{t('subject.journey')}</h3>
           <div className="grid md:grid-cols-4 gap-4 text-center">
             <div className="p-4 bg-white/20 rounded-lg">
               <div className="text-3xl font-bold text-gray-800">0</div>
-              <div className="text-sm text-gray-600">Total XP</div>
+              <div className="text-sm text-gray-600">{t('subject.total_xp')}</div>
             </div>
             <div className="p-4 bg-white/20 rounded-lg">
               <div className="text-3xl font-bold text-gray-800">Level 1</div>
-              <div className="text-sm text-gray-600">Current Level</div>
+              <div className="text-sm text-gray-600">{t('subject.current_level')}</div>
             </div>
             <div className="p-4 bg-white/20 rounded-lg">
               <div className="text-3xl font-bold text-gray-800">0</div>
-              <div className="text-sm text-gray-600">Streak Days</div>
+              <div className="text-sm text-gray-600">{t('subject.streak_days')}</div>
             </div>
             <div className="p-4 bg-white/20 rounded-lg">
               <div className="text-3xl font-bold text-gray-800">0</div>
-              <div className="text-sm text-gray-600">Badges Earned</div>
+              <div className="text-sm text-gray-600">{t('subject.badges_earned')}</div>
             </div>
           </div>
         </div>

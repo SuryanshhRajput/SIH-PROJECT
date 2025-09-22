@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Target, Trophy, User, CheckCircle, BookOpen, Settings, Play, Bell, Menu, X } from "lucide-react";
 import { User as UserType, Notification } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 interface NavigationProps {
   currentUser: UserType | null;
@@ -12,10 +14,30 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, currentPage, notifications, setCurrentUser }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useLanguage();
 
   const navigationItems = currentUser?.userType === "teacher" 
     ? ["teacher-dashboard", "students", "create-quiz", "assignments", "attendance", "ai", "teacher-profile"]
-    : ["dashboard", "lessons", "quiz", "ai", "notes", "profile"];
+    : ["dashboard", "lessons", "games", "quiz", "ai", "notes", "profile"];
+
+  const getNavigationLabel = (page: string) => {
+    const labelMap: { [key: string]: string } = {
+      "teacher-dashboard": t('nav.dashboard'),
+      "dashboard": t('nav.dashboard'),
+      "students": "Students",
+      "create-quiz": "Create Quiz",
+      "assignments": "Assignments",
+      "attendance": "Attendance",
+      "lessons": t('nav.lessons'),
+      "games": t('nav.games'),
+      "quiz": t('nav.quiz'),
+      "ai": t('nav.ai'),
+      "notes": t('nav.notes'),
+      "profile": t('nav.profile'),
+      "teacher-profile": t('nav.profile')
+    };
+    return labelMap[page] || page.replace("-", " ");
+  };
 
   const getIcon = (page: string) => {
     const iconMap: { [key: string]: React.ReactNode } = {
@@ -26,6 +48,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
       "assignments": <BookOpen className="w-5 h-5" />,
       "attendance": <CheckCircle className="w-5 h-5" />,
       "lessons": <Play className="w-5 h-5" />,
+      "games": <Play className="w-5 h-5" />,
       "quiz": <CheckCircle className="w-5 h-5" />,
       "ai": <Play className="w-5 h-5" />,
       "notes": <BookOpen className="w-5 h-5" />,
@@ -63,7 +86,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
                 }`}
               >
                 {getIcon(page)}
-                <span className="capitalize text-sm">{page.replace("-", " ")}</span>
+                <span className="capitalize text-sm">{getNavigationLabel(page)}</span>
               </button>
             ))}
 
@@ -79,6 +102,8 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
               )}
             </button>
 
+            <LanguageSwitcher />
+
             <button
               onClick={() => {
                 setCurrentUser(null);
@@ -86,7 +111,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
               }}
               className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
             >
-              Logout
+              {t('nav.logout')}
             </button>
           </div>
 
@@ -131,20 +156,23 @@ const Navigation: React.FC<NavigationProps> = ({ currentUser, setCurrentPage, cu
                   }`}
                 >
                   {getIcon(page)}
-                  <span className="capitalize">{page.replace("-", " ")}</span>
+                  <span className="capitalize">{getNavigationLabel(page)}</span>
                 </button>
               ))}
               
-              <button
-                onClick={() => {
-                  setCurrentUser(null);
-                  setCurrentPage("login");
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 py-3 rounded-xl transition-all duration-300 shadow-lg mt-4"
-              >
-                Logout
-              </button>
+              <div className="mt-4 space-y-2">
+                <LanguageSwitcher />
+                <button
+                  onClick={() => {
+                    setCurrentUser(null);
+                    setCurrentPage("login");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 py-3 rounded-xl transition-all duration-300 shadow-lg"
+                >
+                  {t('nav.logout')}
+                </button>
+              </div>
             </div>
           </div>
         )}

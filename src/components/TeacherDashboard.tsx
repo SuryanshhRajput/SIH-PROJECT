@@ -3,6 +3,7 @@ import { User, Trophy, Award, BookOpen, CheckCircle } from "lucide-react";
 import { User as UserType, Assignment } from "../types";
 import { db } from "../firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface TeacherDashboardProps {
   currentUser: UserType;
@@ -15,6 +16,7 @@ interface TeacherDashboardProps {
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users, assignments, setCurrentPage, setUsers, addNotification }) => {
   const students = (users || []).filter((u) => u.userType === "student");
+  const { t } = useLanguage();
   const totalStudents = students.length;
 
   const [rollLookup, setRollLookup] = useState("");
@@ -68,10 +70,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
       {/* Header */}
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">
-          Teacher Dashboard
+          {t('teacher.title')}
         </h2>
         <p className="text-gray-600">
-          Welcome back, {currentUser?.profile?.name || currentUser.username}!
+          {t('teacher.welcome')}, {currentUser?.profile?.name || currentUser.username}!
         </p>
       </div>
 
@@ -79,28 +81,28 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
       <div className="grid md:grid-cols-4 gap-6 mb-8">
         <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl">
           <User className="w-8 h-8 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Total Students</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('teacher.total_students')}</h3>
           <p className="text-2xl font-bold">{totalStudents}</p>
         </div>
 
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
           <Trophy className="w-8 h-8 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Avg Progress</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('teacher.avg_progress')}</h3>
           <p className="text-2xl font-bold">{avgProgress}/5</p>
-          <p className="text-sm opacity-90">Lessons</p>
+          <p className="text-sm opacity-90">{t('teacher.lessons')}</p>
         </div>
 
         <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl">
           <Award className="w-8 h-8 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Avg Score</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('teacher.avg_score')}</h3>
           <p className="text-2xl font-bold">{avgScore}%</p>
         </div>
 
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl">
           <BookOpen className="w-8 h-8 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Assignments</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('teacher.assignments')}</h3>
           <p className="text-2xl font-bold">{assignments.length}</p>
-          <p className="text-sm opacity-90">Active</p>
+          <p className="text-sm opacity-90">{t('teacher.active')}</p>
         </div>
       </div>
 
@@ -108,7 +110,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-xl font-semibold mb-4">Recent Student Activity</h3>
+          <h3 className="text-xl font-semibold mb-4">{t('teacher.recent_activity')}</h3>
           <div className="space-y-4">
             {students.slice(0, 5).map((student) => (
               <div
@@ -122,8 +124,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
                   <div>
                     <p className="font-medium">{student.profile?.name || student.username}</p>
                     <p className="text-sm text-gray-600">
-                      {student.progress?.completedLessons || 0} lessons
-                      completed
+                      {student.progress?.completedLessons || 0} {t('teacher.completed_lessons')}
                     </p>
                   </div>
                 </div>
@@ -145,14 +146,14 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
 
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+          <h3 className="text-xl font-semibold mb-4">{t('teacher.quick_actions')}</h3>
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => setCurrentPage("create-quiz")}
               className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
             >
               <CheckCircle className="w-8 h-8 text-blue-600 mb-2" />
-              <span className="font-medium text-center">Create Quiz</span>
+              <span className="font-medium text-center">{t('teacher.create_quiz')}</span>
             </button>
 
             <button
@@ -160,7 +161,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
               className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
             >
               <BookOpen className="w-8 h-8 text-green-600 mb-2" />
-              <span className="font-medium text-center">Assignments</span>
+              <span className="font-medium text-center">{t('teacher.assignments')}</span>
             </button>
 
             <button
@@ -168,7 +169,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
               className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
             >
               <User className="w-8 h-8 text-purple-600 mb-2" />
-              <span className="font-medium text-center">Attendance</span>
+              <span className="font-medium text-center">{t('teacher.attendance')}</span>
             </button>
 
             <button
@@ -176,19 +177,19 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
               className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
             >
               <Trophy className="w-8 h-8 text-orange-600 mb-2" />
-              <span className="font-medium text-center">View Students</span>
+              <span className="font-medium text-center">{t('teacher.view_students')}</span>
             </button>
           </div>
 
           {/* Roll number add */}
           <div className="mt-6 p-4 border border-gray-200 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Add student by Roll / Enrollment</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('teacher.add_by_roll')}</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={rollLookup}
                 onChange={(e) => setRollLookup(e.target.value)}
-                placeholder="Enter roll number"
+                placeholder={t('teacher.enter_roll')}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
               <button
@@ -196,7 +197,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ currentUser, users,
                 disabled={loadingLookup}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60"
               >
-                {loadingLookup ? "Adding..." : "Add Student"}
+                {loadingLookup ? t('teacher.adding') : t('teacher.add_student')}
               </button>
             </div>
           </div>

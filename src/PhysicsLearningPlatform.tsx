@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { auth } from "./firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, collection, getDocs } from "firebase/firestore";
+import { doc, collection, getDocs, getDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig";
-import { User, Notification, Assignment, Quiz, AttendanceRecord, AnimationState, PhysicsQuestion, QuizAnswers, StudyNote } from "./types";
+import { User, Notification, Assignment, Quiz, AttendanceRecord, AnimationState, QuizAnswers, StudyNote } from "./types";
 
 // Pages
 import LoginPage from "./pages/LoginPage";
@@ -23,7 +23,6 @@ import CreateQuizPage from "./components/CreateQuizPage";
 import AssignmentsPage from "./components/AssignmentsPage";
 import AttendancePage from "./components/AttendancePage";
 import StudentsPage from "./components/StudentsPage";
-import { getDoc } from "firebase/firestore";
 import AIChat from "./components/AIChat";
 import AIChatPage from "./components/AIChatPage";
 import ClassSelection from "./components/ClassSelection";
@@ -32,6 +31,9 @@ import ChapterView from "./components/ChapterView";
 import GamificationSystem from "./components/GamificationSystem";
 import { Class, Subject } from "./types";
 
+// Game Components - Lazy loaded for better performance
+const GamesPage = lazy(() => import("./components/games/GamesPage"));
+
 const PhysicsLearningPlatform = () => {
   // Global State
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -39,6 +41,7 @@ const PhysicsLearningPlatform = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [customQuizzes, setCustomQuizzes] = useState<Quiz[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [studyNotes] = useState<StudyNote[]>([]);
@@ -46,6 +49,7 @@ const PhysicsLearningPlatform = () => {
   // Hierarchical Navigation State
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [navigationStack, setNavigationStack] = useState<string[]>([]);
   
   // Animation state for lessons
@@ -55,8 +59,8 @@ const PhysicsLearningPlatform = () => {
     time: 0
   });
 
-  // Quiz state
-  const [physicsQuestions] = useState<PhysicsQuestion[]>([
+  // Quiz state - memoized for performance
+  const physicsQuestions = useMemo(() => [
     {
       id: 1,
       question: "What is the acceleration due to gravity on Earth?",
@@ -81,21 +85,21 @@ const PhysicsLearningPlatform = () => {
       explanation: "Force is measured in Newtons (N) in the SI system.",
       topic: "Units"
     }
-  ]);
+  ], []);
 
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
   const [showResults, setShowResults] = useState(false);
 
-  // Add notification helper
-  const addNotification = (message: string) => {
+  // Add notification helper - memoized for performance
+  const addNotification = useCallback((message: string) => {
     const newNotification: Notification = {
       id: Date.now(),
       message,
       timestamp: new Date(),
     };
     setNotifications((prev) => [...prev, newNotification]);
-  };
+  }, []);
 
   // Hierarchical Navigation Handlers
   const handleClassSelect = (classId: number) => {
@@ -172,25 +176,34 @@ const PhysicsLearningPlatform = () => {
   };
   
   useEffect(() => {
+    // Firebase authentication setup
+    console.log('🔐 Setting up Firebase authentication...');
+
     const unsub = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // fetch Firestore profile
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          setCurrentUser(userDoc.data() as User);
-          setCurrentPage(
-            userDoc.data().userType === "teacher" ? "teacher-dashboard" : "dashboard"
-          );
+      try {
+        if (user) {
+          // fetch Firestore profile
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setCurrentUser(userDoc.data() as User);
+            setCurrentPage(
+              userDoc.data().userType === "teacher" ? "teacher-dashboard" : "dashboard"
+            );
+          }
+          // load users list
+          const usersSnap = await getDocs(collection(db, "users"));
+          const allUsers: User[] = usersSnap.docs.map((d) => d.data() as User);
+          setUsers(allUsers);
+          // load attendance
+          const attendanceSnap = await getDocs(collection(db, "attendance"));
+          const allAttendance: AttendanceRecord[] = attendanceSnap.docs.map((d) => d.data() as AttendanceRecord);
+          setAttendance(allAttendance);
+        } else {
+          setCurrentUser(null);
+          setCurrentPage("login");
         }
-        // load users list
-        const usersSnap = await getDocs(collection(db, "users"));
-        const allUsers: User[] = usersSnap.docs.map((d) => d.data() as User);
-        setUsers(allUsers);
-        // load attendance
-        const attendanceSnap = await getDocs(collection(db, "attendance"));
-        const allAttendance: AttendanceRecord[] = attendanceSnap.docs.map((d) => d.data() as AttendanceRecord);
-        setAttendance(allAttendance);
-      } else {
+      } catch (error) {
+        console.error('Firebase authentication error:', error);
         setCurrentUser(null);
         setCurrentPage("login");
       }
@@ -286,6 +299,11 @@ const PhysicsLearningPlatform = () => {
               setUsers={setUsers}
               addNotification={addNotification}
             />
+          )}
+          {currentPage === "games" && (
+            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="text-lg">Loading games...</div></div>}>
+              <GamesPage />
+            </Suspense>
           )}
           {currentPage === "quiz" && (
             <QuizPage

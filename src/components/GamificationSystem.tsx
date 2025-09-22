@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Trophy, Star, Award, Crown, Medal } from "lucide-react";
 import { UserProgress, Badge, LeaderboardEntry } from "../types";
 
@@ -22,6 +22,7 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
     lastActiveDate: currentUser?.progress?.lastActiveDate || new Date().toISOString()
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [leaderboard] = useState<LeaderboardEntry[]>([]);
   const [showBadges, setShowBadges] = useState(false);
 
@@ -45,7 +46,7 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
   };
 
   // Available badges
-  const availableBadges: Omit<Badge, 'earnedAt'>[] = [
+  const availableBadges: Omit<Badge, 'earnedAt'>[] = useMemo(() => [
     {
       id: 1,
       name: "First Steps",
@@ -102,10 +103,10 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
       icon: "💯",
       category: "quiz"
     }
-  ];
+  ], []);
 
   // Check for new badges
-  const checkForNewBadges = (newProgress: UserProgress) => {
+  const checkForNewBadges = useCallback((newProgress: UserProgress) => {
     const newBadges: Badge[] = [];
     
     // First Steps
@@ -149,7 +150,7 @@ const GamificationSystem: React.FC<GamificationSystemProps> = ({
     }
 
     return newBadges;
-  };
+  }, [progress.badges, availableBadges]);
 
   // Add XP and check for level up
   const addXP = useCallback((amount: number, source: 'chapter' | 'quiz' | 'game') => {

@@ -53,7 +53,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
     setGrade("");
   };
 
-  // 🔹 Firebase-powered login/signup
+  // 🔹 Login/signup with Firebase fallback for development
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -66,6 +66,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         return;
       }
 
+      // Firebase authentication
       if (isSignup) {
         // Validate signup fields based on user type
         if (userType === "student") {

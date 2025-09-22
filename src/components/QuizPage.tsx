@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 import { Award } from "lucide-react";
 import { User, PhysicsQuestion, Quiz, QuizAnswers } from "../types";
 
@@ -32,6 +33,7 @@ const QuizPage: React.FC<QuizPageProps> = ({
   addNotification,
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const { t } = useLanguage();
   const handleQuizSubmit = () => {
     const correctAnswers = physicsQuestions.filter(
       (q, index) => quizAnswers[q.id] === q.correct
@@ -57,7 +59,7 @@ const QuizPage: React.FC<QuizPageProps> = ({
     setCurrentUser(updatedUser);
     setUsers(users.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
     setShowResults(true);
-    addNotification(`Quiz completed! You scored ${score}%`);
+    addNotification(`${t('quiz.completed_toast')} ${score}%`);
   };
 
   if (showResults) {
@@ -101,10 +103,10 @@ const QuizPage: React.FC<QuizPageProps> = ({
                     quizAnswers[q.id] === q.correct ? "text-green-700" : "text-red-700"
                   }`}
                 >
-                  Your answer: {q.options[quizAnswers[q.id]] || "Not answered"}
+                  {t('quiz.your_answer')}: {q.options[quizAnswers[q.id]] || "Not answered"}
                 </p>
                 {quizAnswers[q.id] !== q.correct && (
-                  <p className="text-sm text-green-700">Correct: {q.options[q.correct]}</p>
+                  <p className="text-sm text-green-700">{t('quiz.correct')}: {q.options[q.correct]}</p>
                 )}
               </div>
             ))}
@@ -118,7 +120,7 @@ const QuizPage: React.FC<QuizPageProps> = ({
             }}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
           >
-            Take Another Quiz
+            {t('quiz.take_another')}
           </button>
         </div>
       </div>
@@ -128,18 +130,18 @@ const QuizPage: React.FC<QuizPageProps> = ({
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-2xl mb-8">
-        <h2 className="text-4xl font-bold mb-2 drop-shadow-lg">Physics Quiz 🧠</h2>
-        <p className="text-xl text-white/90">Test your physics knowledge with interactive questions</p>
+        <h2 className="text-4xl font-bold mb-2 drop-shadow-lg">{t('quiz.title')}</h2>
+        <p className="text-xl text-white/90">{t('quiz.subtitle')}</p>
       </div>
 
       <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl p-8 border border-gray-100">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl font-semibold">
-              Question {currentQuestionIndex + 1} of {physicsQuestions.length}
+              {t('quiz.question_of')} {currentQuestionIndex + 1} {t('quiz.of')} {physicsQuestions.length}
             </div>
             <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-xl font-semibold">
-              Topic: {physicsQuestions[currentQuestionIndex]?.topic}
+              {t('quiz.topic')}: {physicsQuestions[currentQuestionIndex]?.topic}
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
@@ -187,7 +189,7 @@ const QuizPage: React.FC<QuizPageProps> = ({
             disabled={currentQuestionIndex === 0}
             className="px-8 py-3 border-2 border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-300 font-semibold"
           >
-            ← Previous
+            ← {t('quiz.previous')}
           </button>
 
           {currentQuestionIndex === physicsQuestions.length - 1 ? (
@@ -195,14 +197,14 @@ const QuizPage: React.FC<QuizPageProps> = ({
               onClick={handleQuizSubmit}
               className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg font-semibold"
             >
-              Submit Quiz 🚀
+              {t('quiz.submit')}
             </button>
           ) : (
             <button
               onClick={() => setCurrentQuestionIndex(Math.min(physicsQuestions.length - 1, currentQuestionIndex + 1))}
               className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg font-semibold"
             >
-              Next →
+              {t('quiz.next')} →
             </button>
           )}
         </div>

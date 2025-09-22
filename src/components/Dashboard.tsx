@@ -1,4 +1,5 @@
 import React from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 import { Trophy, Award, Star, Play, CheckCircle, ChevronRight } from "lucide-react";
 import { User } from "../types";
 
@@ -7,14 +8,16 @@ interface DashboardProps {
   setCurrentPage: (page: string) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) => (
+const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) => {
+  const { t } = useLanguage();
+  return (
   <div className="max-w-7xl mx-auto p-6">
     <div className="mb-8">
       <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-2xl">
         <h2 className="text-4xl font-bold mb-2 drop-shadow-lg">
-          Welcome back, {currentUser?.username}! 👋
+          {t('dashboard.welcome_back')}, {currentUser?.username}! 👋
         </h2>
-        <p className="text-xl text-white/90">Continue your physics journey with interactive learning</p>
+        <p className="text-xl text-white/90">{t('dashboard.subtitle')}</p>
       </div>
     </div>
 
@@ -26,10 +29,10 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
             <p className="text-4xl font-bold">
               {currentUser?.progress?.completedLessons || 0}/5
             </p>
-            <p className="text-sm opacity-90">Lessons Completed</p>
+            <p className="text-sm opacity-90">{t('dashboard.lessons_completed')}</p>
           </div>
         </div>
-        <h3 className="text-xl font-semibold mb-2">Progress</h3>
+        <h3 className="text-xl font-semibold mb-2">{t('dashboard.progress')}</h3>
         <div className="w-full bg-white/20 rounded-full h-3">
           <div 
             className="bg-white rounded-full h-3 transition-all duration-500"
@@ -45,10 +48,10 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
             <p className="text-4xl font-bold">
               {currentUser?.progress?.totalScore || 0}%
             </p>
-            <p className="text-sm opacity-90">Average Score</p>
+            <p className="text-sm opacity-90">{t('dashboard.average_score')}</p>
           </div>
         </div>
-        <h3 className="text-xl font-semibold mb-2">Quiz Performance</h3>
+        <h3 className="text-xl font-semibold mb-2">{t('dashboard.quiz_performance')}</h3>
         <div className="w-full bg-white/20 rounded-full h-3">
           <div 
             className="bg-white rounded-full h-3 transition-all duration-500"
@@ -64,10 +67,10 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
             <p className="text-4xl font-bold">
               {currentUser?.progress?.quizScores?.length || 0}
             </p>
-            <p className="text-sm opacity-90">Quizzes Taken</p>
+            <p className="text-sm opacity-90">{t('dashboard.quizzes_taken')}</p>
           </div>
         </div>
-        <h3 className="text-xl font-semibold mb-2">Achievements</h3>
+        <h3 className="text-xl font-semibold mb-2">{t('dashboard.achievements')}</h3>
         <div className="flex space-x-1">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
@@ -82,7 +85,7 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
     </div>
 
     <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl p-8 border border-gray-100">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800">Quick Actions</h3>
+      <h3 className="text-2xl font-bold mb-6 text-gray-800">{t('dashboard.quick_actions')}</h3>
       <div className="grid md:grid-cols-3 gap-6">
         <button
           onClick={() => setCurrentPage("class-selection")}
@@ -93,8 +96,8 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
               <span className="text-2xl">🎓</span>
             </div>
             <div className="text-left">
-              <span className="text-xl font-semibold block">Start Learning</span>
-              <span className="text-purple-100 text-sm">Choose Your Class & Subject</span>
+              <span className="text-xl font-semibold block">{t('dashboard.start_learning')}</span>
+              <span className="text-purple-100 text-sm">{t('dashboard.choose_class_subject')}</span>
             </div>
           </div>
           <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
@@ -109,8 +112,8 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
               <Play className="w-8 h-8" />
             </div>
             <div className="text-left">
-              <span className="text-xl font-semibold block">Continue Learning</span>
-              <span className="text-blue-100 text-sm">Interactive Physics Lessons</span>
+              <span className="text-xl font-semibold block">{t('dashboard.continue_learning')}</span>
+              <span className="text-blue-100 text-sm">{t('dashboard.interactive_lessons')}</span>
             </div>
           </div>
           <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
@@ -125,8 +128,8 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
               <CheckCircle className="w-8 h-8" />
             </div>
             <div className="text-left">
-              <span className="text-xl font-semibold block">Take Quiz</span>
-              <span className="text-emerald-100 text-sm">Test Your Knowledge</span>
+              <span className="text-xl font-semibold block">{t('dashboard.take_quiz')}</span>
+              <span className="text-emerald-100 text-sm">{t('dashboard.test_knowledge')}</span>
             </div>
           </div>
           <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
@@ -135,5 +138,6 @@ const Dashboard: React.FC<DashboardProps> = ({ currentUser, setCurrentPage }) =>
     </div>
   </div>
 );
+}
 
 export default Dashboard;

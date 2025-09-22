@@ -1,5 +1,6 @@
 // components/games/ProjectileGame.tsx
 import React, { useRef, useEffect, useState } from "react";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 interface ProjectileGameProps {
   goBack: () => void;
@@ -11,6 +12,7 @@ const ProjectileGame: React.FC<ProjectileGameProps> = ({ goBack }) => {
   const [speed, setSpeed] = useState(50);
   const [isPlaying, setIsPlaying] = useState(false);
   const [time, setTime] = useState(0);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -50,25 +52,25 @@ const ProjectileGame: React.FC<ProjectileGameProps> = ({ goBack }) => {
 
   return (
     <div>
-      <h3 className="text-xl font-semibold mb-4">🚀 Projectile Motion</h3>
+      <h3 className="text-xl font-semibold mb-4">{t('projectile.title')}</h3>
       <canvas ref={canvasRef} width={600} height={400} className="border mb-4" />
 
       <div className="flex space-x-4 mb-4">
         <label>
-          Angle: 
+          {t('projectile.angle')}: 
           <input type="range" min="10" max="80" value={angle} onChange={(e) => setAngle(+e.target.value)} />
         </label>
         <label>
-          Speed: 
+          {t('projectile.speed')}: 
           <input type="range" min="10" max="100" value={speed} onChange={(e) => setSpeed(+e.target.value)} />
         </label>
       </div>
 
       <button onClick={() => { setIsPlaying(true); setTime(0); }} className="bg-blue-600 text-white px-4 py-2 rounded-lg">
-        Launch
+        {t('projectile.launch')}
       </button>
       <button onClick={goBack} className="ml-4 bg-gray-600 text-white px-4 py-2 rounded-lg">
-        Back to Menu
+        {t('projectile.back')}
       </button>
     </div>
   );

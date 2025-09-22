@@ -1,5 +1,6 @@
 // components/games/GravityDrop.tsx
 import React, { useRef, useEffect, useState } from "react";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 interface GravityDropProps {
   goBack: () => void;
@@ -11,6 +12,7 @@ const GravityDrop: React.FC<GravityDropProps> = ({ goBack }) => {
   const [time, setTime] = useState(0);
   const [height, setHeight] = useState(100);
   const [velocity, setVelocity] = useState(0);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -101,25 +103,25 @@ const GravityDrop: React.FC<GravityDropProps> = ({ goBack }) => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Gravity Drop Simulation</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{t('gravity.title')}</h2>
         <div className="flex space-x-4">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
-            {isPlaying ? "Pause" : "Play"}
+            {isPlaying ? t('gravity.pause') : t('gravity.play')}
           </button>
           <button
             onClick={reset}
             className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
           >
-            Reset
+            {t('gravity.reset')}
           </button>
           <button
             onClick={goBack}
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
           >
-            Back to Games
+            {t('gravity.back')}
           </button>
         </div>
       </div>
@@ -127,7 +129,7 @@ const GravityDrop: React.FC<GravityDropProps> = ({ goBack }) => {
       <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="text-center mb-6">
           <p className="text-gray-600 mb-4">
-            Watch how gravity affects a falling object! The ball starts at 100m height.
+            {t('gravity.description')}
           </p>
         </div>
 
@@ -142,25 +144,25 @@ const GravityDrop: React.FC<GravityDropProps> = ({ goBack }) => {
 
         <div className="grid md:grid-cols-3 gap-4 text-center">
           <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-blue-800">Height</h3>
+            <h3 className="font-semibold text-blue-800">{t('gravity.height')}</h3>
             <p className="text-2xl font-bold text-blue-600">{height.toFixed(1)}m</p>
           </div>
           <div className="bg-green-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-green-800">Velocity</h3>
+            <h3 className="font-semibold text-green-800">{t('gravity.velocity')}</h3>
             <p className="text-2xl font-bold text-green-600">{velocity.toFixed(1)} m/s</p>
           </div>
           <div className="bg-purple-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-purple-800">Time</h3>
+            <h3 className="font-semibold text-purple-800">{t('gravity.time')}</h3>
             <p className="text-2xl font-bold text-purple-600">{time.toFixed(1)}s</p>
           </div>
         </div>
 
         <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold mb-2">Physics Concepts:</h3>
+          <h3 className="font-semibold mb-2">{t('gravity.concepts')}</h3>
           <ul className="text-sm text-gray-700 space-y-1">
-            <li>• <strong>Free Fall:</strong> Object falling under gravity alone</li>
-            <li>• <strong>Acceleration:</strong> Constant 9.8 m/s² downward</li>
-            <li>• <strong>Equations:</strong> h = h₀ - ½gt², v = gt</li>
+            <li>• <strong>{t('gravity.free_fall')}</strong></li>
+            <li>• <strong>{t('gravity.acceleration')}</strong></li>
+            <li>• <strong>{t('gravity.equations')}</strong></li>
           </ul>
         </div>
       </div>

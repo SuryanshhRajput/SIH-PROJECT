@@ -1,5 +1,6 @@
 // components/games/FormulaMatch.tsx
 import React, { useState } from "react";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 interface FormulaMatchProps {
   goBack: () => void;
@@ -7,10 +8,12 @@ interface FormulaMatchProps {
 
 const FormulaMatch: React.FC<FormulaMatchProps> = ({ goBack }) => {
   const [score, setScore] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentLevel, setCurrentLevel] = useState(1);
   const [selectedFormula, setSelectedFormula] = useState<string | null>(null);
   const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
   const [matches, setMatches] = useState<{[key: string]: string}>({});
+  const { t } = useLanguage();
 
   const formulas = [
     { id: "fma", formula: "F = ma", description: "Newton's Second Law" },
@@ -84,20 +87,20 @@ const FormulaMatch: React.FC<FormulaMatchProps> = ({ goBack }) => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Formula Match Game</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{t('formula.title')}</h2>
         <div className="flex space-x-4">
-          <span className="text-lg font-semibold">Score: {score}</span>
+          <span className="text-lg font-semibold">{t('formula.score')}: {score}</span>
           <button
             onClick={resetGame}
             className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
           >
-            Reset
+            {t('formula.reset')}
           </button>
           <button
             onClick={goBack}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
-            Back to Games
+            {t('formula.back')}
           </button>
         </div>
       </div>
@@ -105,7 +108,7 @@ const FormulaMatch: React.FC<FormulaMatchProps> = ({ goBack }) => {
       <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="text-center mb-6">
           <p className="text-gray-600 mb-4">
-            Match each physics formula with its correct description!
+            {t('formula.instructions')}
           </p>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
@@ -114,14 +117,14 @@ const FormulaMatch: React.FC<FormulaMatchProps> = ({ goBack }) => {
             />
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            {Object.keys(matches).length} / {formulas.length} matches found
+            {Object.keys(matches).length} / {formulas.length} {t('formula.progress')}
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Formulas Column */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-center">Physics Formulas</h3>
+            <h3 className="text-lg font-semibold mb-4 text-center">{t('formula.physics_formulas')}</h3>
             <div className="space-y-3">
               {formulas.map((formula) => (
                 <button
@@ -144,7 +147,7 @@ const FormulaMatch: React.FC<FormulaMatchProps> = ({ goBack }) => {
 
           {/* Descriptions Column */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-center">Descriptions</h3>
+            <h3 className="text-lg font-semibold mb-4 text-center">{t('formula.descriptions')}</h3>
             <div className="space-y-3">
               {formulas.map((formula) => (
                 <button
@@ -169,9 +172,9 @@ const FormulaMatch: React.FC<FormulaMatchProps> = ({ goBack }) => {
         {Object.keys(matches).length === formulas.length && (
           <div className="mt-8 text-center">
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">🎉 Congratulations!</h3>
-              <p>You've matched all formulas correctly!</p>
-              <p className="text-sm mt-2">Final Score: {score} points</p>
+              <h3 className="text-lg font-semibold mb-2">{t('formula.congratulations')}</h3>
+              <p>{t('formula.completed')}</p>
+              <p className="text-sm mt-2">{t('formula.final_score')}: {score} {t('formula.points')}</p>
             </div>
           </div>
         )}

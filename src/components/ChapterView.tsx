@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 import { 
   ArrowLeft, 
   Play, 
@@ -114,6 +115,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
   currentUser,
   onChapterComplete 
 }) => {
+  const { t } = useLanguage();
   const [chapters] = useState<Chapter[]>(mockChapters);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
@@ -192,12 +194,12 @@ const ChapterView: React.FC<ChapterViewProps> = ({
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Chapter</span>
+            <span>{t('chapter.back_chapter')}</span>
           </button>
           
           <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white shadow-2xl">
             <h1 className="text-3xl font-bold drop-shadow-lg">{selectedGame.title}</h1>
-            <p className="text-white/90">Have fun while learning!</p>
+            <p className="text-white/90">{t('chapter.have_fun')}</p>
           </div>
         </div>
 
@@ -244,7 +246,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Chapters</span>
+            <span>{t('chapter.back_chapters')}</span>
           </button>
           
           <div className={`bg-gradient-to-r ${getDifficultyColor(selectedChapter.difficulty)} rounded-2xl p-8 text-white shadow-2xl`}>
@@ -254,7 +256,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
                 <p className="text-xl text-white/90 mb-4">{selectedChapter.description}</p>
                 <div className="flex items-center space-x-4">
                   <span className="text-2xl">{getDifficultyIcon(selectedChapter.difficulty)}</span>
-                  <span className="text-lg capitalize">{selectedChapter.difficulty} Level</span>
+                  <span className="text-lg capitalize">{selectedChapter.difficulty} {t('chapter.level')}</span>
                 </div>
               </div>
               <div className="text-6xl">{selectedSubject.icon}</div>
@@ -270,7 +272,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
               <div className="flex items-center space-x-3 mb-4">
                 <FileText className="w-8 h-8 text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Study Notes</h2>
+                <h2 className="text-2xl font-bold text-gray-800">{t('chapter.study_notes')}</h2>
               </div>
               <div className="space-y-4">
                 {selectedChapter.notes.map((note) => (
@@ -290,7 +292,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
               <div className="flex items-center space-x-3 mb-4">
                 <Trophy className="w-8 h-8 text-yellow-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Quizzes</h2>
+                <h2 className="text-2xl font-bold text-gray-800">{t('chapter.quizzes')}</h2>
               </div>
               <div className="space-y-4">
                 {selectedChapter.quizzes.map((quiz) => (
@@ -313,7 +315,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
                         onClick={() => handleCompleteActivity(quiz.xpReward)}
                         className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-300"
                       >
-                        Start Quiz
+                        {t('chapter.start_quiz')}
                       </button>
                     </div>
                   </div>
@@ -325,7 +327,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
               <div className="flex items-center space-x-3 mb-4">
                 <Gamepad2 className="w-8 h-8 text-purple-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Mini Games</h2>
+                <h2 className="text-2xl font-bold text-gray-800">{t('chapter.mini_games')}</h2>
               </div>
               <div className="space-y-4">
                 {selectedChapter.games.map((game) => (
@@ -343,7 +345,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
                         onClick={() => handleGameSelect(game)}
                         className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
                       >
-                        Play Game
+                        {t('chapter.play_game')}
                       </button>
                     </div>
                   </div>
@@ -357,7 +359,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
 
             {/* Fun Facts */}
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-6 text-white">
-              <h3 className="text-xl font-bold mb-4">Did You Know? 🤔</h3>
+              <h3 className="text-xl font-bold mb-4">{t('chapter.did_you_know')}</h3>
               <div className="space-y-3">
                 {selectedChapter.aiFacts.map((fact, index) => (
                   <div key={index} className="bg-white/20 rounded-lg p-3 text-sm">
@@ -369,18 +371,18 @@ const ChapterView: React.FC<ChapterViewProps> = ({
 
             {/* Progress */}
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Your Progress</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">{t('chapter.your_progress')}</h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span>Notes Read</span>
+                  <span>{t('chapter.notes_read')}</span>
                   <span>0/{selectedChapter.notes.length}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span>Quizzes Completed</span>
+                  <span>{t('chapter.quizzes_completed')}</span>
                   <span>0/{selectedChapter.quizzes.length}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span>Games Played</span>
+                  <span>{t('chapter.games_played')}</span>
                   <span>0/{selectedChapter.games.length}</span>
                 </div>
               </div>
@@ -395,7 +397,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
               <div className="text-center">
                 <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  Welcome to {selectedChapter.title}!
+                  {t('chapter.welcome_to')} {selectedChapter.title}!
                 </h2>
                 <p className="text-gray-600 mb-6">
                   {selectedChapter.aiFacts[0] || "Let's start learning together!"}
@@ -404,7 +406,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
                   onClick={() => setShowWelcomePopup(false)}
                   className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-300"
                 >
-                  Let's Start! 🚀
+                  {t('chapter.lets_start')}
                 </button>
               </div>
             </div>
@@ -422,8 +424,8 @@ const ChapterView: React.FC<ChapterViewProps> = ({
           onClick={onBack}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-4 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back to Subjects</span>
+            <ArrowLeft className="w-5 h-5" />
+            <span>{t('chapter.back_subjects')}</span>
         </button>
         
         <div className={`bg-gradient-to-r ${selectedSubject.color} rounded-2xl p-8 text-white shadow-2xl`}>
@@ -431,7 +433,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
             <div className="text-6xl">{selectedSubject.icon}</div>
             <div>
               <h1 className="text-4xl font-bold drop-shadow-lg">{selectedSubject.name}</h1>
-              <p className="text-xl text-white/90">Choose a chapter to start learning</p>
+              <p className="text-xl text-white/90">{t('chapter.choose_chapter')}</p>
             </div>
           </div>
         </div>
@@ -449,7 +451,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
               {/* Chapter Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
-                  <span className="text-2xl font-bold text-gray-800">Chapter {index + 1}</span>
+                  <span className="text-2xl font-bold text-gray-800">{t('chapter.chapter')} {index + 1}</span>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold text-white ${getDifficultyColor(chapter.difficulty)}`}>
                     {chapter.difficulty}
                   </span>
@@ -469,7 +471,7 @@ const ChapterView: React.FC<ChapterViewProps> = ({
                 </div>
                 <div>
                   <div className="font-semibold">{chapter.quizzes.length}</div>
-                  <div>Quizzes</div>
+                  <div>{t('chapter.quizzes')}</div>
                 </div>
                 <div>
                   <div className="font-semibold">{chapter.games.length}</div>

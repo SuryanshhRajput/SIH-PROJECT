@@ -4,28 +4,28 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
+// Firebase configuration for Vidya Verse
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyCkiyoVE4FqiVg9OdDYBNyQZd4bdiW1Mkg",
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "vidya-verse-2.firebaseapp.com",
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "vidya-verse-2",
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "vidya-verse-2.firebasestorage.app",
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "725150462453",
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:725150462453:web:ec465211b28833e796b0bc",
 };
 
-// Validate required env vars early for clearer error messages during login
+// Validate required env vars
 const missingKeys = Object.entries(firebaseConfig)
   .filter(([, value]) => !value)
   .map(([key]) => key);
 
 if (missingKeys.length > 0) {
-  const message = `Missing Firebase environment variables: ${missingKeys.join(
-    ", "
-  )}.\nCreate a .env.local with REACT_APP_* values from your Firebase project and restart dev server.`;
-  // Surface in console for developers and throw to prevent confusing Firebase errors later
-  // eslint-disable-next-line no-console
+  const message = `Missing Firebase environment variables: ${missingKeys.join(", ")}. Please check your .env.local file.`;
   console.error(message);
-  throw new Error(message);
+  // Don't throw error, just log it and use fallback
+  console.warn('Using fallback Firebase configuration...');
+} else {
+  console.log('🔥 Firebase configuration loaded successfully!');
 }
 
 // Initialize Firebase

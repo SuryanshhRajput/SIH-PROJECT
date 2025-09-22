@@ -1,4 +1,5 @@
 import React from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 import { ChevronRight, BookOpen, Calculator, Atom, Globe, Palette } from "lucide-react";
 import { Class } from "../types";
 
@@ -105,18 +106,20 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ onClassSelect, currentU
     return descriptions[grade as keyof typeof descriptions] || "Advanced learning";
   };
 
+  const { t } = useLanguage();
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8 text-center">
         <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-2xl">
           <h1 className="text-4xl font-bold mb-4 drop-shadow-lg">
-            Welcome to VidyaVerse! 🚀
+            {t('class.welcome')}
           </h1>
           <p className="text-xl text-white/90 mb-2">
-            Choose your class to start your learning journey
+            {t('class.choose')}
           </p>
           <p className="text-lg text-white/80">
-            Interactive learning with AI-powered assistance
+            {t('class.subtitle')}
           </p>
         </div>
       </div>
@@ -148,7 +151,7 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ onClassSelect, currentU
               {/* Progress Indicator */}
               <div className="mb-4">
                 <div className="flex justify-between text-white/80 text-sm mb-1">
-                  <span>Progress</span>
+                  <span>{t('class.progress')}</span>
                   <span>0%</span>
                 </div>
                 <div className="w-full bg-white/20 rounded-full h-2">
@@ -158,7 +161,7 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ onClassSelect, currentU
 
               {/* Action Button */}
               <div className="flex items-center justify-center space-x-2 text-white group-hover:text-white/90">
-                <span className="font-semibold">Enter Class</span>
+                <span className="font-semibold">{t('class.enter')}</span>
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -169,23 +172,23 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ onClassSelect, currentU
       {/* Additional Info */}
       <div className="mt-12 text-center">
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">What you'll get:</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('class.what_get')}</h3>
           <div className="grid md:grid-cols-4 gap-4 text-sm text-gray-700">
             <div className="flex items-center justify-center space-x-2">
               <span className="text-2xl">🤖</span>
-              <span>AI Tutor</span>
+              <span>{t('class.ai_tutor')}</span>
             </div>
             <div className="flex items-center justify-center space-x-2">
               <span className="text-2xl">🎮</span>
-              <span>Mini Games</span>
+              <span>{t('class.mini_games')}</span>
             </div>
             <div className="flex items-center justify-center space-x-2">
               <span className="text-2xl">🏆</span>
-              <span>XP & Badges</span>
+              <span>{t('class.xp_badges')}</span>
             </div>
             <div className="flex items-center justify-center space-x-2">
               <span className="text-2xl">📊</span>
-              <span>Progress Tracking</span>
+              <span>{t('class.progress_tracking')}</span>
             </div>
           </div>
         </div>
